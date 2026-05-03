@@ -10,9 +10,10 @@ function App() {
     <>
       <Routes>
         <Route path="*" element={<NotFound />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<p>House</p>} />
+        <Route path="/authentication" element={<Authentication />} />
         <Route element={<ProtectedRoutes isAuthenticated={isAuthenticated} />}>
-          <Route path="/authentication" element={<Authentication />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
       </Routes>
     </>

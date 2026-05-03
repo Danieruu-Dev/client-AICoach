@@ -1,7 +1,29 @@
+import ModeToggle from "@/components/mode-toggle";
+import Login from "@/features/authentication/Login";
+import Register from "@/features/authentication/Register";
 import React from "react";
 
 function Authentication() {
-  return <div>Authentication</div>;
+  const [isActive, setIsActive] = React.useState<"login" | "register">("login");
+
+  const handleActivePageChange = (active: "login" | "register") => {
+    setIsActive(active);
+  };
+
+  return (
+    <>
+      <ModeToggle />
+      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          {isActive === "login" ? (
+            <Login handleActivePageChange={handleActivePageChange} />
+          ) : (
+            <Register handleActivePageChange={handleActivePageChange} />
+          )}
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default Authentication;
