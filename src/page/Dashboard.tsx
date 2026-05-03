@@ -1,5 +1,4 @@
 import { useAuth } from "@/context/AuthProviderContext";
-import React from "react";
 
 function Dashboard() {
   const auth = useAuth();
