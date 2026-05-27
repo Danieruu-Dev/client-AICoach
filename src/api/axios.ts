@@ -23,12 +23,17 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestPath = originalRequest?.url ?? "";
+    const isAuthEndpoint =
+      requestPath.includes("/api/auth/login") ||
+      requestPath.includes("/api/auth/register") ||
+      requestPath.includes("/api/auth/refresh");
 
     if (
       error.response?.status !== 401 ||
       !originalRequest ||
       originalRequest._retry ||
-      originalRequest.url?.includes("/api/auth/refresh")
+      isAuthEndpoint
     ) {
       return Promise.reject(error);
     }

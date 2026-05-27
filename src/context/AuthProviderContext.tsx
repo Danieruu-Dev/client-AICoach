@@ -58,8 +58,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    setUser(null);
-    setAccessToken(null);
+    (async () => {
+      try {
+        if (user?.id) {
+          console.log(user.id);
+          await api.post(
+            `/api/auth/logout/${user.id}`,
+            {},
+            { withCredentials: true },
+          );
+        }
+      } catch (error) {
+        console.error("Logout failed:", error);
+      } finally {
+        setUser(null);
+        setAccessToken(null);
+      }
+    })();
   };
 
   const refreshToken = useCallback(async () => {
