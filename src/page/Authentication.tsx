@@ -4,9 +4,12 @@ import Register from "@/features/authentication/Register";
 import React from "react";
 
 function Authentication() {
-  const [isActive, setIsActive] = React.useState<"login" | "register">("login");
+  const [isActive, setIsActive] = React.useState<"login" | "register">(
+    localStorage.getItem("activePage") === "register" ? "register" : "login",
+  );
 
   const handleActivePageChange = (active: "login" | "register") => {
+    localStorage.setItem("activePage", active);
     setIsActive(active);
   };
 
