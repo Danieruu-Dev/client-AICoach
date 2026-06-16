@@ -17,16 +17,19 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
     publicId: string,
+    onboardingCompleted: boolean,
   ) => void;
   logout: () => void;
   refreshToken: () => Promise<void>;
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
+  onboardingCompleted: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -45,6 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     firstName: string,
     lastName: string,
     publicId: string,
+    onboardingCompleted: boolean,
   ) => {
     console.log(email, firstName, lastName, publicId, accessToken);
 
@@ -53,8 +57,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email,
       firstName,
       lastName,
+      onboardingCompleted,
     });
     setAccessToken(accessToken);
+    console.log(onboardingCompleted);
   };
 
   const logout = () => {
@@ -91,6 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
+        onboardingCompleted: data.onboardingCompleted,
       });
       setAccessToken(data.access_token);
     } catch (error) {
@@ -109,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [refreshToken]);
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, login, logout, refreshToken, user }}
+      value={{ isAuthenticated, login, logout, refreshToken, user, setUser }}
     >
       {isLoading ? <div>Loading...</div> : children}
     </AuthContext.Provider>

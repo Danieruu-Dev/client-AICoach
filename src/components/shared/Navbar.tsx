@@ -1,6 +1,7 @@
 import { useTheme } from "@/context/ThemeProviderContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import ModeToggle from "../mode-toggle";
 
 export default function Navbar() {
   const { theme } = useTheme();
@@ -10,21 +11,15 @@ export default function Navbar() {
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
-    <nav className="fixed top-0 right-0 left-0 flex h-20 items-center justify-between border-b border-border bg-white px-4 text-foreground z-100">
+    <nav className="fixed top-0 right-0 left-0 flex h-20 items-center justify-between border-b border-border bg-background px-4 text-foreground z-100">
       <div className="flex items-start gap-3">
         <div className="cursor-pointer text-primary">
-          <img
-            src="/public/icon-preparo.png"
-            alt="logo"
-            className="w-14 h-10"
-          />
+          <img src="/icon-preparo.png" alt="logo" className="w-14 h-10" />
         </div>
         <div className="cursor-pointer">
           <img
             src={
-              isDarkTheme
-                ? "/public/preparo_typo_light.png"
-                : "/public/preparo_typo_dark.png"
+              isDarkTheme ? "/preparo_typo_light.png" : "/preparo_typo_dark.png"
             }
             alt="typography title"
             className="w-37.5 h-12.25"
@@ -46,6 +41,7 @@ export default function Navbar() {
         </button>
       </div>
       <div className="flex items-start gap-2 text-[15px] font-medium">
+        <ModeToggle />
         <Link to="/authentication">
           <Button
             variant="outline"

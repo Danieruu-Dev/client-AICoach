@@ -33,6 +33,7 @@ interface LoginResponse {
   firstName: string;
   lastName: string;
   publicId: string;
+  onboardingCompleted: boolean;
 }
 
 interface LoginProps {
@@ -60,10 +61,15 @@ function Login({ handleActivePageChange }: LoginProps) {
         data.firstName,
         data.lastName,
         data.publicId,
+        data.onboardingCompleted,
       );
       setIsError([]);
       toast.success("Login successful!");
-      navigate("/dashboard");
+      if (data.onboardingCompleted) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
