@@ -20,70 +20,93 @@ import api from "@/api/axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthProviderContext";
+import { useMutation } from "@tanstack/react-query";
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  access_token: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  publicId: string;
+  onboardingCompleted: boolean;
+}
 
 interface LoginProps {
   handleActivePageChange: (page: "login" | "register") => void;
 }
 
 function Login({ handleActivePageChange }: LoginProps) {
-  const [isLoading, setIsLoading] = useState(false); //add proper loading soon
   const [isError, setIsError] = useState<string[]>([]);
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setIsError([]);
-
-    const fd = new FormData(e.currentTarget);
-    const email = fd.get("email");
-    const password = fd.get("password");
-
-    try {
-      if (!email || !password) {
-        setIsError(["Please fill in all fields"]);
-        setIsLoading(false);
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(String(email))) {
-        setIsError(["Invalid email format"]);
-        setIsLoading(false);
-        return;
-      }
-
-      const result = await api.post("/api/auth/login", {
+  const loginMutation = useMutation<LoginResponse, unknown, LoginCredentials>({
+    mutationFn: async ({ email, password }) => {
+      const result = await api.post<LoginResponse>("/api/auth/login", {
         email,
         password,
       });
 
-      const data = result.data;
-      //Note to myself: make sure to add interface or type for the following parameter here
+      return result.data;
+    },
+    onSuccess: (data) => {
       auth?.login(
         data.access_token,
         data.email,
         data.firstName,
         data.lastName,
         data.publicId,
+        data.onboardingCompleted,
       );
-
-      toast.success("Login successful!");
       setIsError([]);
-      setIsLoading(false);
-      navigate("/dashboard");
-    } catch (error) {
+      toast.success("Login successful!");
+      if (data.onboardingCompleted) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || "Login failed";
         setIsError([message]);
         toast.error("Login failed!");
-      } else {
-        setIsError(["An unexpected error occurred"]);
-        toast.error("An unexpected error occurred");
+        return;
       }
-      setIsLoading(false);
+
+      setIsError(["An unexpected error occurred"]);
+      toast.error("An unexpected error occurred");
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsError([]);
+
+    const fd = new FormData(e.currentTarget);
+    const email = fd.get("email");
+    const password = fd.get("password");
+
+    if (!email || !password) {
+      setIsError(["Please fill in all fields"]);
+      return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(String(email))) {
+      setIsError(["Invalid email format"]);
+      return;
+    }
+
+    loginMutation.mutate({
+      email: String(email),
+      password: String(password),
+    });
   };
 
   return (
@@ -165,8 +188,8 @@ function Login({ handleActivePageChange }: LoginProps) {
                 <Input id="password" name="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
+                <Button type="submit" disabled={loginMutation.isPending}>
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
