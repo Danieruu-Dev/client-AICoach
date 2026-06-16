@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { isValidEmailAddress } from "@/utils/validation";
 
 interface RegisterCredentials {
   firstName: string;
@@ -77,8 +78,7 @@ function Register({ handleActivePageChange }: RegisterProps) {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(String(email))) {
+    if (!isValidEmailAddress(String(email))) {
       setIsError(["Invalid email format"]);
       return;
     }
