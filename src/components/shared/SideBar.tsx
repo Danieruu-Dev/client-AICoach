@@ -9,7 +9,9 @@ import { useAuth } from "@/context/AuthProviderContext";
 import { cn } from "@/lib/utils";
 import {
   FileText,
+  BookOpen,
   Gauge,
+  Gem,
   Home,
   LogOut,
   Menu,
@@ -32,6 +34,7 @@ type SideBarProps = {
   email?: string;
   avatarUrl?: string;
   pageName: string;
+  showPlan?: boolean;
   onNavigateAttempt?: (path: string) => void;
 };
 type NavItem = {
@@ -42,6 +45,7 @@ type NavItem = {
 };
 const navItems: NavItem[] = [
   { label: "Dashboard", icon: Home, path: "/dashboard" },
+  { label: "Roadmap", icon: BookOpen, path: "/roadmap" },
   { label: "Interviews", icon: Users, path: "/interviews" },
   { label: "Question Bank", icon: FileText, path: "/question-bank" },
   { label: "AI Feedback", icon: Sparkles, path: "/ai-feedback" },
@@ -57,6 +61,7 @@ function SideBar({
   email,
   avatarUrl,
   pageName,
+  showPlan = false,
   onNavigateAttempt,
 }: SideBarProps) {
   const { theme } = useTheme();
@@ -220,6 +225,36 @@ function SideBar({
         </nav>
 
         <div className="pt-4">
+          {showPlan && (
+            <div
+              className={cn(
+                "mb-3 rounded-[8px] border border-sidebar-border bg-sidebar-accent/45 p-3",
+                isCollapsed && "lg:flex lg:justify-center lg:p-2",
+              )}
+            >
+              <div className={cn("flex items-center gap-2.5", isCollapsed && "lg:justify-center")}>
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-primary/10 text-primary">
+                  <Gem className="size-4" />
+                </span>
+                <div className={cn("min-w-0 flex-1", labelClass)}>
+                  <p className="text-xs font-semibold">Free plan</p>
+                  <p className="mt-0.5 text-[11px] text-sidebar-foreground/65">1 of 1 roadmap used</p>
+                </div>
+              </div>
+              <div className={cn("mt-3", labelClass)}>
+                <div className="h-1.5 overflow-hidden rounded-full bg-sidebar-border">
+                  <div className="h-full w-full rounded-full bg-primary" />
+                </div>
+                <button
+                  type="button"
+                  className="mt-3 w-full rounded-md border border-sidebar-border bg-sidebar px-2.5 py-2 text-xs font-medium transition-colors hover:bg-sidebar-accent"
+                >
+                  View plans
+                </button>
+              </div>
+            </div>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button

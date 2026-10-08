@@ -37,11 +37,12 @@ export default function Verification() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const queryUserId = searchParams.get("userId");
+
   const token = searchParams.get("token");
-  const verificationUserId = queryUserId ?? id;
-  const isVerificationLink = Boolean(queryUserId && token);
+  const verificationUserId = id;
+  const isVerificationLink = Boolean(verificationUserId && token);
   const activeUserId = verificationUserId ?? null;
+  console.log(activeUserId, "activeUserId");
 
   const { data: isVerified } = useQuery({
     queryKey: ["account-status", activeUserId],
@@ -62,6 +63,7 @@ export default function Verification() {
     enabled: !!activeUserId && !isVerificationLink,
   });
 
+  // Email resend timer logic
   useEffect(() => {
     if (secondsRemaining === 0) return;
 
@@ -116,7 +118,7 @@ export default function Verification() {
 
   useEffect(() => {
     const verifyEmailLink = async () => {
-      if (!isVerificationLink || !queryUserId || !token) {
+      if (!isVerificationLink || !verificationUserId || !token) {
         return;
       }
 
@@ -126,12 +128,14 @@ export default function Verification() {
       try {
         await api.get("/api/auth/verify", {
           params: {
-            userId: queryUserId,
+            userId: verificationUserId,
             token,
           },
         });
 
-        navigate(`/verification/success/${queryUserId}`, { replace: true });
+        navigate(`/verification/success/${verificationUserId}`, {
+          replace: true,
+        });
       } catch (error) {
         console.error("Failed to verify email link:", error);
         setVerificationError(
@@ -143,7 +147,7 @@ export default function Verification() {
     };
 
     verifyEmailLink();
-  }, [isVerificationLink, navigate, queryUserId, token]);
+  }, [isVerificationLink, navigate, verificationUserId, token]);
 
   useEffect(() => {
     const initializeVerificationState = async () => {
@@ -154,7 +158,9 @@ export default function Verification() {
         const accountResponse = await api.get(
           `/api/auth/account/${verificationUserId}`,
         );
+        console.log("account response:", accountResponse.data);
         setIsIDValid(accountResponse.data);
+        console.log("account response:", accountResponse.data);
 
         const cooldownResponse = await api.get(
           `/api/auth/resend-cooldown/${verificationUserId}`,
@@ -177,7 +183,6 @@ export default function Verification() {
     initializeVerificationState();
   }, [verificationUserId, isVerificationLink]);
 
-  console.log("Resend successful, fetching cooldown...", secondsRemaining);
   if (isVerificationLink && verificationError) {
     return (
       <div className="relative flex min-h-svh items-center justify-center bg-muted p-6 md:p-10">

@@ -1,35 +1,25 @@
 import { SelectField } from "@/components/shared/SelectFields";
-import {
-  Briefcase,
-  Globe2,
-  Activity,
-  Gauge,
-  MessagesSquare,
-} from "lucide-react";
+import { Gauge, Info } from "lucide-react";
 import type { ProfileState } from "@/page/Onboarding";
 import { cn } from "@/lib/utils";
-import api from "@/api/axios";
-import { useQuery } from "@tanstack/react-query";
 
 const currentStatusOptions = [
-  { id: "ACTIVELY_LOOKING", name: "Actively looking" },
-  { id: "OPEN_TO_OPPORTUNITIES", name: "Open to opportunities" },
-  { id: "NOT_LOOKING", name: "Not looking" },
-  { id: "HIRED", name: "Hired" },
+  { id: "STUDENT", name: "Student" },
+  { id: "FRESH_GRADUATE", name: "Fresh Graduate" },
+  { id: "CAREER_SHIFTER", name: "Career Shifter" },
+  { id: "JUNIOR_DEVELOPER", name: "Junior Developer" },
+  { id: "UNEMPLOYED", name: "Unemployed" },
+  { id: "EMPLOYED_LOOKING", name: "Employed but Looking" },
 ];
 
-const experienceOptions = [
-  { id: "ENTRY_LEVEL", name: "Entry Level" },
-  { id: "JUNIOR", name: "Junior" },
-  { id: "MID_LEVEL", name: "Mid Level" },
-  { id: "SENIOR", name: "Senior" },
+const codingExperienceOptions = [
+  { id: "LESS_THAN_6_MONTHS", name: "Less than 6 months" },
+  { id: "SIX_MONTHS_TO_1_YEAR", name: "6 months to 1 year" },
+  { id: "ONE_TO_TWO_YEARS", name: "1 to 2 years" },
+  { id: "TWO_TO_FOUR_YEARS", name: "2 to 4 years" },
+  { id: "FOUR_PLUS_YEARS", name: "4+ years" },
 ];
-const interviewTypeOptions = [
-  { id: "TECHNICAL", name: "Technical" },
-  { id: "SYSTEM_DESIGN", name: "System Design" },
-  { id: "BEHAVIORAL", name: "Behavioral" },
-  { id: "HR", name: "HR" },
-];
+
 export function OnboardingProfile({
   profile,
   setProfile,
@@ -40,41 +30,9 @@ export function OnboardingProfile({
   showValidationError: boolean;
 }) {
   const profileErrors = {
-    currentRole: showValidationError && !profile.currentRole,
     currentStatus: showValidationError && !profile.currentStatus,
-    experience: showValidationError && !profile.experience,
-    targetIndustry: showValidationError && !profile.targetIndustry,
-    preferredInterview: showValidationError && !profile.preferredInterview,
+    codingExperience: showValidationError && !profile.codingExperience,
   };
-
-  const fetchTargetIndustries = async () => {
-    const response = await api.get("/api/profile/target-industry");
-
-    return response.data.map(({ id, name }: { id: number; name: string }) => ({
-      id,
-      name,
-    }));
-  };
-
-  const fetchCareerRoles = async () => {
-    const response = await api.get("/api/profile/career-role");
-
-    console.log("response:", response.data);
-    return response.data.map(({ id, name }: { id: number; name: string }) => ({
-      id,
-      name,
-    }));
-  };
-
-  const { data: targetIndustry } = useQuery({
-    queryKey: ["target-industry"],
-    queryFn: fetchTargetIndustries,
-  });
-
-  const { data: careerRole } = useQuery({
-    queryKey: ["career-role"],
-    queryFn: fetchCareerRoles,
-  });
 
   return (
     <div className="mx-auto w-full max-w-3xl rounded-2xl border border-border/70 bg-card/90 p-4 shadow-sm backdrop-blur-sm md:p-6">
@@ -95,21 +53,9 @@ export function OnboardingProfile({
         )}
         <div className="grid gap-4 md:grid-cols-2">
           <SelectField
-            label="Current role (or most recent)"
-            placeholder="Select Role"
-            icon={<Briefcase className="size-4" />}
-            value={profile.currentRole}
-            onChange={(value) => setProfile({ ...profile, currentRole: value })}
-            options={careerRole || []}
-            className={cn(
-              profileErrors.currentRole &&
-                "border-destructive focus-visible:ring-destructive",
-            )}
-          />
-          <SelectField
             label="Current status"
             placeholder="Select Status"
-            icon={<Activity className="size-4" />}
+            icon={<Info className="size-4" />}
             value={profile.currentStatus}
             onChange={(value) =>
               setProfile({ ...profile, currentStatus: value })
@@ -124,43 +70,17 @@ export function OnboardingProfile({
             label="Experience level"
             placeholder="Select Experience"
             icon={<Gauge className="size-4" />}
-            value={profile.experience}
-            onChange={(value) => setProfile({ ...profile, experience: value })}
-            options={Object.values(experienceOptions)}
-            className={cn(
-              profileErrors.experience &&
-                "border-destructive focus-visible:ring-destructive",
-            )}
-          />
-          <SelectField
-            label="Target industry"
-            placeholder="Select Industry"
-            icon={<Globe2 className="size-4" />}
-            value={profile.targetIndustry}
+            value={profile.codingExperience}
             onChange={(value) =>
-              setProfile({ ...profile, targetIndustry: value })
+              setProfile({ ...profile, codingExperience: value })
             }
-            options={targetIndustry || []}
+            options={Object.values(codingExperienceOptions)}
             className={cn(
-              profileErrors.targetIndustry &&
+              profileErrors.codingExperience &&
                 "border-destructive focus-visible:ring-destructive",
             )}
           />
         </div>
-        <SelectField
-          label="Preferred interview type"
-          placeholder="Select Interview Type"
-          icon={<MessagesSquare className="size-4" />}
-          value={profile.preferredInterview}
-          onChange={(value) =>
-            setProfile({ ...profile, preferredInterview: value })
-          }
-          options={interviewTypeOptions}
-          className={cn(
-            profileErrors.preferredInterview &&
-              "border-destructive focus-visible:ring-destructive",
-          )}
-        />
 
         <p className="text-xs text-muted-foreground">
           We&apos;ll use this to show relevant opportunities and insights.

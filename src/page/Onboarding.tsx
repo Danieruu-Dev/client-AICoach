@@ -2,18 +2,24 @@ import ProgressStepper from "@/components/onboarding/ProgressStepper";
 import SideBar from "@/components/shared/SideBar";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import OnboardingProfile from "@/features/onboarding/OnboardingProfile";
 import OnboardingReview from "@/features/onboarding/OnboardingReview";
 import OnboardingSkills from "@/features/onboarding/OnboardingSkills";
-import { ChevronLeft, ChevronRight, Send } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Send,
+  ShieldCheck,
+} from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import api from "@/api/axios";
 import { useAuth } from "@/context/AuthProviderContext";
 import axios from "axios";
-import OnboardingSuccess from "@/features/onboarding/OnboardingSuccess";
 import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,18 +32,26 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
+import OnboardingPreparation from "@/features/onboarding/OnboardingPreparation";
+
+const LEGAL_VERSION = "1.0";
 
 type Options = {
   id: number | string;
   name: string;
 };
 
-export interface ProfileState {
-  currentRole: Options | null;
-  currentStatus: Options | null;
-  experience: Options | null;
+export interface PreparationState {
+  targetRole: Options | null;
   targetIndustry: Options | null;
-  preferredInterview: Options | null;
+  hasUpcomingInterview: boolean;
+  interviewDate?: Date;
+  careerGoal: string;
+}
+
+export interface ProfileState {
+  currentStatus: Options | null;
+  codingExperience: Options | null;
 }
 export type Skills = {
   id: number;
@@ -47,43 +61,49 @@ export type Skills = {
 //data structure for submission
 interface OnboardingData {
   profile: {
-    experienceLevel: string;
-    careerRoleId: number;
-    targetIndustryId: number;
-    careerGoal: string;
+    codingExperience: string;
     currentStatus: string;
-    preferredInterview: string;
   };
-  preferredTechnology: {
+  preparationGoal: {
+    targetRoleId: number;
+    targetIndustryId: number;
+    hasUpcomingInterview: boolean;
+    interviewDate?: Date;
+    careerGoal: string;
+  };
+  preparationGoalTechnology: {
     technologyId: number;
   }[];
+  acceptedTermsVersion: string;
+  acceptedPrivacyVersion: string;
+  legalAcceptedAt: string;
 }
 
 export default function Onboarding() {
   const auth = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const steps = ["Profile", "Skills", "Review"];
+  const steps = ["Profile", "Preparation", "Skills", "Review"];
   const [showValidationError, setShowValidationError] = useState(false);
   const [pendingNavigationPath, setPendingNavigationPath] = useState<
     string | null
   >(null);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
 
   const [profile, setProfile] = useState<ProfileState>({
-    currentRole: null,
     currentStatus: null,
-    experience: null,
+    codingExperience: null,
+  });
+  const [preparation, setPreparation] = useState<PreparationState>({
+    targetRole: null,
     targetIndustry: null,
-    preferredInterview: null,
+    hasUpcomingInterview: false,
+    interviewDate: undefined,
+    careerGoal: "",
   });
   const isProfileValid = () => {
-    return (
-      profile.currentRole &&
-      profile.currentStatus &&
-      profile.experience &&
-      profile.targetIndustry &&
-      profile.preferredInterview
-    );
+    return profile.currentStatus && profile.codingExperience;
   };
 
   const [skills, setSkills] = useState<Skills[]>([]);
@@ -101,7 +121,7 @@ export default function Onboarding() {
         return;
       }
 
-      if (currentStep === 2 && !isSkillsValid()) {
+      if (currentStep === 3 && !isSkillsValid()) {
         setShowSkillsValidationError(true);
         return;
       }
@@ -123,11 +143,13 @@ export default function Onboarding() {
 
   const hasUnsavedOnboardingData =
     currentStep < 4 &&
-    (profile.currentRole ||
+    (preparation.targetRole ||
+      preparation.targetIndustry ||
+      preparation.hasUpcomingInterview ||
+      preparation.interviewDate ||
+      preparation.careerGoal ||
       profile.currentStatus ||
-      profile.experience ||
-      profile.targetIndustry ||
-      profile.preferredInterview ||
+      profile.codingExperience ||
       skills.length > 0);
   const shouldWarnBeforeLeaving = Boolean(hasUnsavedOnboardingData);
 
@@ -170,6 +192,18 @@ export default function Onboarding() {
     handleNavigateAway("/dashboard");
   };
 
+  const handleOpenConsentDialog = () => {
+    setHasAcceptedConsent(false);
+    setShowConsentDialog(true);
+  };
+
+  const handleConfirmConsent = () => {
+    if (!hasAcceptedConsent) return;
+
+    setShowConsentDialog(false);
+    mutate();
+  };
+
   const handleSubmit = async () => {
     if (showSkillsValidationError && showValidationError) {
       toast.error(
@@ -179,16 +213,22 @@ export default function Onboarding() {
     }
     const data: OnboardingData = {
       profile: {
-        experienceLevel: profile.experience?.id.toString() || "",
-        careerRoleId: Number(profile.currentRole?.id) || 0,
-        targetIndustryId: Number(profile.targetIndustry?.id) || 0,
-        careerGoal: profile.currentStatus?.id.toString() || "",
+        codingExperience: profile.codingExperience?.id.toString() || "",
         currentStatus: profile.currentStatus?.id.toString() || "",
-        preferredInterview: profile.preferredInterview?.id.toString() || "",
       },
-      preferredTechnology: skills.map((skill) => ({
+      preparationGoal: {
+        targetRoleId: Number(preparation.targetRole?.id) || 0,
+        targetIndustryId: Number(preparation.targetIndustry?.id) || 0,
+        hasUpcomingInterview: preparation.hasUpcomingInterview,
+        interviewDate: preparation.interviewDate,
+        careerGoal: preparation.careerGoal || "",
+      },
+      preparationGoalTechnology: skills.map((skill) => ({
         technologyId: Number(skill.id) || 0,
       })),
+      acceptedTermsVersion: LEGAL_VERSION,
+      acceptedPrivacyVersion: LEGAL_VERSION,
+      legalAcceptedAt: new Date().toISOString(),
     };
     console.log("Submitting onboarding data:", data);
     const response = await api.post(`/api/profile/${auth?.user?.id}`, data);
@@ -238,7 +278,7 @@ export default function Onboarding() {
           </section>
 
           <section className="mx-auto mt-5 flex w-full max-w-4xl flex-col gap-5">
-            {currentStep < 4 && (
+            {currentStep < 5 && (
               <div className="mx-auto w-full max-w-2xl">
                 <ProgressStepper currentStep={currentStep} steps={steps} />
               </div>
@@ -250,8 +290,14 @@ export default function Onboarding() {
                 showValidationError={showValidationError}
               />
             )}
-
             {currentStep === 2 && (
+              <OnboardingPreparation
+                preparation={preparation}
+                setPreparation={setPreparation}
+                showValidationError={showValidationError}
+              />
+            )}
+            {currentStep === 3 && (
               <OnboardingSkills
                 skills={skills}
                 setSkills={setSkills}
@@ -259,14 +305,16 @@ export default function Onboarding() {
               />
             )}
 
-            {currentStep === 3 && (
-              <OnboardingReview profile={profile} skills={skills} />
+            {currentStep === 4 && (
+              <OnboardingReview
+                profile={profile}
+                skills={skills}
+                preparation={preparation}
+              />
             )}
 
-            {currentStep === 4 && <OnboardingSuccess />}
-
             <div className="flex justify-end  max-w-3xl mx-auto w-full">
-              {currentStep > 1 && currentStep < 4 && (
+              {currentStep > 1 && currentStep < 5 && (
                 <button
                   className="flex items-center gap-1 rounded-sm border px-4 py-2 text-[13px] bg-primary text-white cursor-pointer transition-colors hover:bg-primary/90"
                   onClick={() => handleProgressButton("prev")}
@@ -275,7 +323,7 @@ export default function Onboarding() {
                 </button>
               )}
 
-              {currentStep < 3 && (
+              {currentStep < 4 && (
                 <button
                   className="flex items-center gap-1 rounded-sm border px-4 py-2 text-[13px] bg-primary text-white cursor-pointer transition-colors hover:bg-primary/90"
                   onClick={() => handleProgressButton("next")}
@@ -284,10 +332,10 @@ export default function Onboarding() {
                 </button>
               )}
 
-              {currentStep === 3 && (
+              {currentStep === 4 && (
                 <button
                   className="flex items-center gap-2 rounded-sm border px-6 py-2 text-[13px] bg-primary text-white cursor-pointer transition-colors hover:bg-primary/90"
-                  onClick={() => mutate()}
+                  onClick={handleOpenConsentDialog}
                   disabled={isPending}
                 >
                   {isPending ? "Submitting..." : "Submit"}
@@ -300,7 +348,7 @@ export default function Onboarding() {
       </div>
 
       <AlertDialog open={Boolean(pendingNavigationPath)}>
-        <AlertDialogContent className="max-w-[92vw] gap-5 rounded-2xl p-6 sm:max-w-md">
+        <AlertDialogContent className="max-w-[92vw] gap-5 rounded-md p-6 sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogMedia className="size-11 bg-destructive/10 text-destructive">
               <AlertTriangle className="size-5" />
@@ -323,6 +371,103 @@ export default function Onboarding() {
             >
               Leave page
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+        <AlertDialogContent className="max-h-[90vh] max-w-[94vw] gap-5 overflow-y-auto rounded-sm p-6 sm:max-w-xl">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="size-11 bg-primary/10 text-primary">
+              <ShieldCheck className="size-5" />
+            </AlertDialogMedia>
+            <AlertDialogTitle className="text-base">
+              Before you finish onboarding
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              Please review how Preparo uses your information to personalize
+              interview preparation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4 text-sm text-foreground">
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-primary">
+                Privacy summary
+              </h3>
+              <p className="text-muted-foreground">
+                Preparo collects account details, interview profile answers,
+                career goals, technology preferences, progress data, and
+                AI-generated interview feedback so we can provide personalized
+                coaching and recommendations.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-primary">
+                AI processing
+              </h3>
+              <p className="text-muted-foreground">
+                Some content you provide may be processed by third-party AI
+                providers to generate interview feedback, practice questions,
+                and recommendations. These providers process data to deliver the
+                requested service.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-primary">
+                Terms summary
+              </h3>
+              <p className="text-muted-foreground">
+                Preparo is for educational interview preparation. AI feedback
+                may be imperfect and does not guarantee job offers, interview
+                success, or career outcomes. Users are responsible for keeping
+                account credentials secure and using the service lawfully.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-primary">
+                Your rights
+              </h3>
+              <p className="text-muted-foreground">
+                You may request deletion of your account and associated personal
+                data by contacting support.
+              </p>
+            </section>
+
+            <div className="flex items-start gap-3 rounded-lg bg-muted/35 p-3">
+              <Checkbox
+                id="onboarding-consent"
+                checked={hasAcceptedConsent}
+                onCheckedChange={(checked) =>
+                  setHasAcceptedConsent(checked === true)
+                }
+                className="mt-1"
+              />
+              <Label
+                htmlFor="onboarding-consent"
+                className="cursor-pointer text-sm leading-6 text-foreground"
+              >
+                I have read and agree to Preparo&apos;s Terms of Service and
+                Privacy Policy summary, including the use of AI processing for
+                interview feedback and recommendations.
+              </Label>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setHasAcceptedConsent(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              onClick={handleConfirmConsent}
+              disabled={!hasAcceptedConsent || isPending}
+            >
+              {isPending ? "Submitting..." : "Agree and submit"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

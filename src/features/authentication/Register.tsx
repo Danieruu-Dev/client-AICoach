@@ -46,7 +46,7 @@ function Register({ handleActivePageChange }: RegisterProps) {
       setIsError([]);
       localStorage.setItem("email", JSON.stringify(result.email));
       toast.success("Account created successfully!");
-      route(`/verification?userId=${result.publicId}`);
+      route(`/verification/${result.publicId}`);
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
