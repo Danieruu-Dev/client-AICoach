@@ -1,4 +1,7 @@
 import { submitInterviewAnswers } from "./api/evaluationApi";
+import VoiceAnswerPanel from "./components/VoiceAnswerPanel";
+import { useAudioRecorder } from "./hooks/useAudioRecorder";
+import { useVoiceAnswers } from "./hooks/useVoiceAnswers";
 import type { AnswerSubmission } from "./types/interviewTypes";
 import api from "@/api/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +10,9 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Keyboard,
   // Lightbulb,
+  Loader2,
   Mic,
   RefreshCw,
 } from "lucide-react";
@@ -35,12 +40,33 @@ interface InterviewSessionQuestionResponse {
   sortOrder: number;
   userRoadmapQuestionStatus: string;
 }
+
+type AnswerMode = "voice" | "text";
+
+const ANSWER_MODES = [
+  { value: "voice", label: "Voice", icon: Mic },
+  { value: "text", label: "Type", icon: Keyboard },
+] as const;
+
 function InterviewQuestion() {
   const { interviewSessionPublicId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const recorder = useAudioRecorder();
+  const isMicBusy = recorder.status !== "idle";
+  // Transcripts land in `answers`, the same place typed text lives
+  const { voiceAnswers, addRecording, retry } = useVoiceAnswers(
+    (sessionQuestionId, text) =>
+      setAnswers((currentAnswers) => ({
+        ...currentAnswers,
+        [sessionQuestionId]: text,
+      })),
+  );
+  // Voice is the default; the last mode picked carries over to unvisited questions
+  const [preferredMode, setPreferredMode] = useState<AnswerMode>("voice");
+  const [answerModes, setAnswerModes] = useState<Record<number, AnswerMode>>({});
 
   const startInterviewSession = async (interviewSessionPublicId: string) => {
     const response = await api.put<InterviewSessionQuestionResponse[]>(
@@ -61,7 +87,10 @@ function InterviewQuestion() {
     const answerSubmissions: AnswerSubmission[] = interviewQuestions.map(question => ({
       sessionQuestionId: question.sessionQuestionId,
       answerText: answers[question.sessionQuestionId].trim(),
-      answerFormat: "TEXT",
+      answerFormat:
+        voiceAnswers[question.sessionQuestionId]?.status === "done"
+          ? "AUDIO"
+          : "TEXT",
     }));
 
     return submitInterviewAnswers(interviewSessionPublicId, answerSubmissions);
@@ -108,6 +137,39 @@ function InterviewQuestion() {
   const activeAnswer = activeQuestion
     ? (answers[activeQuestion.sessionQuestionId] ?? "")
     : "";
+  const answerMode = activeQuestion
+    ? (answerModes[activeQuestion.sessionQuestionId] ?? preferredMode)
+    : preferredMode;
+  const activeVoiceAnswer = activeQuestion
+    ? voiceAnswers[activeQuestion.sessionQuestionId]
+    : undefined;
+  const isTranscribing = questions.some(
+    (question) =>
+      voiceAnswers[question.sessionQuestionId]?.status === "transcribing",
+  );
+
+  const startRecording = () => {
+    if (!activeQuestion) return;
+    const { sessionQuestionId } = activeQuestion;
+    void recorder.start((recording) => addRecording(sessionQuestionId, recording));
+  };
+
+  const updateActiveAnswer = (text: string) => {
+    if (!activeQuestion) return;
+    setAnswers((currentAnswers) => ({
+      ...currentAnswers,
+      [activeQuestion.sessionQuestionId]: text,
+    }));
+  };
+
+  const selectAnswerMode = (mode: AnswerMode) => {
+    if (!activeQuestion) return;
+    setPreferredMode(mode);
+    setAnswerModes((currentModes) => ({
+      ...currentModes,
+      [activeQuestion.sessionQuestionId]: mode,
+    }));
+  };
 
   if (!interviewSessionPublicId) {
     return <Navigate to="/roadmap" replace />;
@@ -185,9 +247,14 @@ function InterviewQuestion() {
           >
             {questions.map((question, index) => {
               const number = index + 1;
-              const completed = Boolean(
-                answers[question.sessionQuestionId]?.trim(),
-              );
+              const voiceStatus =
+                voiceAnswers[question.sessionQuestionId]?.status;
+              const transcribing = voiceStatus === "transcribing";
+              const completed =
+                !transcribing &&
+                Boolean(answers[question.sessionQuestionId]?.trim());
+              const failed =
+                !transcribing && !completed && voiceStatus === "error";
               const active = number === safeCurrentQuestion;
               return (
                 <div
@@ -197,11 +264,20 @@ function InterviewQuestion() {
                   <button
                     type="button"
                     onClick={() => setCurrentQuestion(number)}
-                    aria-label={`Go to question ${number}`}
+                    disabled={isMicBusy}
+                    aria-label={`Go to question ${number}${transcribing ? ", transcribing" : failed ? ", transcription failed" : completed ? ", answered" : ""}`}
                     aria-current={active ? "step" : undefined}
-                    className={`flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border text-xs font-semibold transition-colors ${completed ? "border-emerald-400 bg-emerald-500/10 text-emerald-600" : active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}
+                    className={`flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${transcribing ? "border-amber-400 bg-amber-500/10 text-amber-600" : completed ? "border-emerald-400 bg-emerald-500/10 text-emerald-600" : failed ? "border-destructive/60 bg-destructive/10 text-destructive" : active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}
                   >
-                    {completed ? <Check className="size-3.5" /> : number}
+                    {transcribing ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : completed ? (
+                      <Check className="size-3.5" />
+                    ) : failed ? (
+                      <AlertCircle className="size-3.5" />
+                    ) : (
+                      number
+                    )}
                   </button>
                   {number < questions.length && (
                     <span
@@ -233,38 +309,66 @@ function InterviewQuestion() {
                   Your answer
                 </label>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Write a clear, structured response in your own words.
+                  {answerMode === "voice"
+                    ? "Speak your answer, or switch to typing."
+                    : "Write a clear, structured response in your own words."}
                 </p>
               </div>
-              <button
-                type="button"
-                disabled
-                title="Voice answers are not available yet"
-                className="flex cursor-not-allowed items-center gap-2 rounded-sm border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground opacity-70"
+              <div
+                role="group"
+                aria-label="Answer mode"
+                className="flex rounded-sm border bg-muted/30 p-0.5"
               >
-                <Mic className="size-4" />
-                Voice answer
-                <span className="rounded-sm bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide">
-                  Coming soon
-                </span>
-              </button>
+                {ANSWER_MODES.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => selectAnswerMode(value)}
+                    disabled={isMicBusy || answerMutation.isPending}
+                    aria-pressed={answerMode === value}
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-[3px] px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${answerMode === value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <Icon className="size-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <textarea
-              id={`answer-${activeQuestion.sessionQuestionId}`}
-              disabled={answerMutation.isPending}
-              value={activeAnswer}
-              onChange={(event) =>
-                setAnswers((currentAnswers) => ({
-                  ...currentAnswers,
-                  [activeQuestion.sessionQuestionId]: event.target.value,
-                }))
-              }
-              placeholder="Type your answer here..."
-              className="mt-3 min-h-32 flex-1 resize-none rounded-sm border bg-background p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/10"
-            />
-            <p className="mt-2 text-right text-[11px] text-muted-foreground">
-              {activeAnswer.length} characters
-            </p>
+            {answerMode === "voice" ? (
+              <VoiceAnswerPanel
+                textareaId={`answer-${activeQuestion.sessionQuestionId}`}
+                recorder={recorder}
+                voiceAnswer={activeVoiceAnswer}
+                answer={activeAnswer}
+                disabled={answerMutation.isPending}
+                onAnswerChange={updateActiveAnswer}
+                onStartRecording={startRecording}
+                onRetry={() => retry(activeQuestion.sessionQuestionId)}
+                onTypeInstead={() => selectAnswerMode("text")}
+              />
+            ) : (
+              <>
+                <textarea
+                  id={`answer-${activeQuestion.sessionQuestionId}`}
+                  // Locked while a recording is transcribing, so the two can't overwrite each other
+                  disabled={
+                    answerMutation.isPending ||
+                    activeVoiceAnswer?.status === "transcribing"
+                  }
+                  value={activeAnswer}
+                  onChange={(event) => updateActiveAnswer(event.target.value)}
+                  placeholder={
+                    activeVoiceAnswer?.status === "transcribing"
+                      ? "Transcribing your recording..."
+                      : "Type your answer here..."
+                  }
+                  className="mt-3 min-h-32 flex-1 resize-none rounded-sm border bg-background p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                />
+                <p className="mt-2 text-right text-[11px] text-muted-foreground">
+                  {activeAnswer.length} characters
+                </p>
+              </>
+            )}
           </div>
 
           {answerMutation.isError && <p role="alert" className="mt-3 text-sm text-destructive">{answerMutation.error.message}</p>}
@@ -272,10 +376,8 @@ function InterviewQuestion() {
           <div className="mt-4 flex items-center justify-between">
             <button
               type="button"
-              onClick={() =>
-                setCurrentQuestion(Math.max(1, safeCurrentQuestion - 1))
-              }
-              disabled={safeCurrentQuestion === 1}
+              onClick={() => setCurrentQuestion(Math.max(1, safeCurrentQuestion - 1))}
+              disabled={safeCurrentQuestion === 1 || isMicBusy}
               className="flex cursor-pointer items-center gap-2 rounded-sm border px-4 py-2.5 text-xs font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ArrowLeft className="size-4" />
@@ -285,11 +387,15 @@ function InterviewQuestion() {
             {questions.length === safeCurrentQuestion ? (
               <button
                 onClick={() => { if (!answerMutation.isPending) answerMutation.mutate(answers); }}
-                disabled={answerMutation.isPending || questions.some(question => !answers[question.sessionQuestionId]?.trim())}
+                disabled={answerMutation.isPending || isMicBusy || isTranscribing || questions.some(question => !answers[question.sessionQuestionId]?.trim())}
                 type="button"
                 className="flex cursor-pointer items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {answerMutation.isPending ? "Saving answers..." : "Submit"}
+                {answerMutation.isPending
+                  ? "Saving answers..."
+                  : isTranscribing
+                    ? "Finishing transcription..."
+                    : "Submit"}
               </button>
             ) : (
               <button
@@ -299,7 +405,7 @@ function InterviewQuestion() {
                     Math.min(questions.length, safeCurrentQuestion + 1),
                   )
                 }
-                disabled={safeCurrentQuestion === questions.length}
+                disabled={safeCurrentQuestion === questions.length || isMicBusy}
                 className="flex cursor-pointer items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Next

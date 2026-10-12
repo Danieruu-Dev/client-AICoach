@@ -6,7 +6,7 @@ export const isFeedbackGenerating = (status?: string) =>
 export interface AnswerSubmission {
   sessionQuestionId: number;
   answerText: string;
-  answerFormat: "TEXT";
+  answerFormat: "TEXT" | "AUDIO";
 }
 
 export interface Feedback {
@@ -20,7 +20,7 @@ export interface Feedback {
   questionBankId: number;
   questionText: string;
   answerText: string;
-  answerFormat: "TEXT" | "VOICE";
+  answerFormat: "TEXT" | "AUDIO";
   submittedAt: string;
   status: EvaluationStatus;
   overallScore: number | null;
