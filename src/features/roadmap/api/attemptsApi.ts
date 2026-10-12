@@ -1,5 +1,5 @@
 import api from "@/api/axios";
-import type { Feedback } from "@/features/interview/interviewTypes";
+import type { Feedback } from "@/features/interview/types/interviewTypes";
 
 export interface CompletedAttemptSummary {
   sessionPublicId: string;

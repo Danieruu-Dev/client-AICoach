@@ -1,5 +1,5 @@
-import { submitInterviewAnswers } from "./evaluationApi";
-import type { AnswerSubmission } from "./interviewTypes";
+import { submitInterviewAnswers } from "./api/evaluationApi";
+import type { AnswerSubmission } from "./types/interviewTypes";
 import api from "@/api/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {

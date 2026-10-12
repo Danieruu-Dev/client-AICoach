@@ -1,4 +1,4 @@
-import ProgressStepper from "@/components/onboarding/ProgressStepper";
+import ProgressStepper from "@/features/onboarding/components/ProgressStepper";
 import SideBar from "@/components/shared/SideBar";
 
 import { Button } from "@/components/ui/button";

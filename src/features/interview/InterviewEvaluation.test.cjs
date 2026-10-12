@@ -18,10 +18,10 @@ function renderEvaluation(status, isError = false) {
     exports,
     require: name => {
       if (name.startsWith("@/assets/")) return { default: "test.png" };
-      if (name === "./evaluationApi") return {};
-      if (name === "./interviewTypes") {
+      if (name === "./api/evaluationApi") return {};
+      if (name === "./types/interviewTypes") {
         const types = {};
-        vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname, "interviewTypes.ts"), "utf8"), {
+        vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname, "types/interviewTypes.ts"), "utf8"), {
           compilerOptions: { module: ts.ModuleKind.CommonJS },
         }).outputText, { exports: types });
         return types;

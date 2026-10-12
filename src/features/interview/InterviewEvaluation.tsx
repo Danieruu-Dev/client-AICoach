@@ -10,8 +10,8 @@ import {
   Sparkles,
 } from "lucide-react";  
 import { Link, Navigate, useParams } from "react-router-dom";
-import { getInterviewEvaluation } from "./evaluationApi";
-import { isFeedbackGenerating, type Feedback } from "./interviewTypes";
+import { getInterviewEvaluation } from "./api/evaluationApi";
+import { isFeedbackGenerating, type Feedback } from "./types/interviewTypes";
 
 const buttonClass =
   "inline-flex items-center justify-center gap-2 rounded-sm border bg-background px-4 py-2 text-xs font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";

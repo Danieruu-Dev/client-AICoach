@@ -3,7 +3,7 @@ import type {
   AnswerSubmission,
   InterviewEvaluation,
   SubmissionResponse,
-} from "./interviewTypes";
+} from "../types/interviewTypes";
 
 export const submitInterviewAnswers = async (
   sessionId: string,

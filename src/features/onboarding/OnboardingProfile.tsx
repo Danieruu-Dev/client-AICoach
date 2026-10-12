@@ -1,6 +1,6 @@
 import { SelectField } from "@/components/shared/SelectFields";
 import { Gauge, Info } from "lucide-react";
-import type { ProfileState } from "@/page/Onboarding";
+import type { ProfileState } from "@/pages/Onboarding";
 import { cn } from "@/lib/utils";
 
 const currentStatusOptions = [

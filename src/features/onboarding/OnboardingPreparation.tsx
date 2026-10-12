@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/shared/SelectFields";
 import { cn } from "@/lib/utils";
-import type { PreparationState } from "@/page/Onboarding";
+import type { PreparationState } from "@/pages/Onboarding";
 import { useQuery } from "@tanstack/react-query";
 import { Briefcase, CalendarDays, ClipboardList, Globe2 } from "lucide-react";
 import React from "react";

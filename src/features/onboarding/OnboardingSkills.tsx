@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import type { Skills } from "@/page/Onboarding";
+import type { Skills } from "@/pages/Onboarding";
 import api from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
 

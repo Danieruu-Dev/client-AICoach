@@ -7,9 +7,9 @@ import {
   CalendarDays,
   ClipboardList,
 } from "lucide-react";
-import type { PreparationState, ProfileState } from "@/page/Onboarding";
+import type { PreparationState, ProfileState } from "@/pages/Onboarding";
 import { Badge } from "@/components/ui/badge";
-import type { Skills } from "@/page/Onboarding";
+import type { Skills } from "@/pages/Onboarding";
 
 function OnboardingReview({
   profile,

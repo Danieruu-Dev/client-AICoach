@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getRoadmapStageDetails } from "./roadmapStageDetails";
-import { fetchCompletedAttempts } from "./attemptsApi";
+import { fetchCompletedAttempts } from "./api/attemptsApi";
 
 interface RoadmapStageContentProps {
   stageName?: string;

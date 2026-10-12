@@ -16,7 +16,7 @@ import {
 // import ModeToggle from "@/components/mode-toggle";
 
 import RoadmapSection from "./RoadmapSection";
-import MetricCard from "@/components/dashboard/MetricCard";
+import MetricCard from "@/features/dashboard/components/MetricCard";
 import PracticeInterviewSection from "./PracticeInterviewSection";
 import RecentActivitySection from "./RecentActivitySection";
 import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
