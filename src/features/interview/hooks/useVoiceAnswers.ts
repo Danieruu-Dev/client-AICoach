@@ -1,5 +1,6 @@
 import { transcribeAnswer } from "../api/transcriptionApi";
 import type { Recording } from "./useAudioRecorder";
+import { isAxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
 
 export type VoiceAnswerStatus = "transcribing" | "done" | "error";
@@ -12,6 +13,30 @@ export interface VoiceAnswer {
 }
 
 const MIN_DURATION_SECONDS = 1;
+
+// Maps the transcribe endpoint's error statuses to something the user can act on
+const transcriptionErrorMessage = (err: unknown) => {
+  if (!isAxiosError(err) || !err.response) {
+    return "We couldn't reach the server. Check your connection and try again.";
+  }
+
+  switch (err.response.status) {
+    case 400:
+      // Validation failures carry the reason, e.g. "Recording is too long"
+      return (
+        (err.response.data as { errors?: string[] } | undefined)?.errors?.[0] ??
+        "That recording couldn't be used."
+      );
+    case 413:
+      return "That recording is too large. Try a shorter answer.";
+    case 422:
+      return "We couldn't hear any speech in that recording.";
+    case 429:
+      return "Too many attempts. Wait a minute and try again.";
+    default:
+      return "We couldn't transcribe that recording.";
+  }
+};
 
 // Keeps one recording per question and transcribes it in the background.
 // The transcript itself is handed to onTranscribed, so text has a single home.
@@ -77,14 +102,14 @@ export function useVoiceAnswers(
         lowConfidence: result.lowConfidence,
         error: null,
       });
-    } catch {
+    } catch (err) {
       if (isStale()) return;
 
       update(sessionQuestionId, {
         status: "error",
         recording,
         lowConfidence: false,
-        error: "We couldn't transcribe that recording.",
+        error: transcriptionErrorMessage(err),
       });
     }
   };
