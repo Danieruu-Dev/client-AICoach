@@ -13,9 +13,9 @@ function RoadmapSwitcher() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-[8px] border border-border bg-card px-4 py-3 text-left shadow-sm transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-80"
+          className="group flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-xl border bg-card p-2 pr-3.5 text-left transition-colors hover:border-primary/30 focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/10 aria-expanded:border-primary/40 aria-expanded:ring-3 aria-expanded:ring-primary/10 sm:w-80 sm:shrink-0"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-[6px] bg-primary/10 text-primary">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
             <BookOpen className="size-4.5" aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1">
@@ -27,14 +27,17 @@ function RoadmapSwitcher() {
             </span>
           </span>
           <ChevronDown
-            className="size-4 shrink-0 text-muted-foreground"
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-aria-expanded:rotate-180"
             aria-hidden="true"
           />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-1.5">
-        <DropdownMenuItem className="gap-3 rounded-[6px] p-3">
-          <span className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+      <DropdownMenuContent
+        align="end"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-64 rounded-xl p-1.5"
+      >
+        <DropdownMenuItem className="gap-3 rounded-lg p-2">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/8 text-primary">
             <BookOpen className="size-4" />
           </span>
           <span className="min-w-0 flex-1">
@@ -48,7 +51,7 @@ function RoadmapSwitcher() {
           <CheckCircle2 className="size-4 text-primary" />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="rounded-[6px] p-3 text-xs">
+        <DropdownMenuItem disabled className="rounded-lg p-2 text-xs">
           Free plan includes one roadmap
         </DropdownMenuItem>
       </DropdownMenuContent>

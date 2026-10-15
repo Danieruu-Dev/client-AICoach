@@ -1,6 +1,7 @@
 import api from "@/api/axios";
 import SideBar from "@/components/shared/SideBar";
 import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthProviderContext";
 
 import RoadmapInfoSection from "@/features/roadmap/RoadmapInfoSection";
@@ -65,15 +66,15 @@ function Roadmap() {
         showPlan
       />
 
-      <main className="min-w-0 flex-1 bg-muted/20 px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-8">
-        <div className="mx-auto max-w-360">
+      <main className="min-w-0 flex-1 bg-muted/20 px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-8 xl:h-dvh xl:pb-6 xl:pt-6">
+        <div className="mx-auto max-w-360 xl:flex xl:h-full xl:flex-col">
           <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-sm font-medium text-primary">Learning path</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight xl:text-2xl">
                 Roadmap
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground xl:mt-1">
                 Follow your personalized path and master the skills for your
                 dream role.
               </p>
@@ -81,73 +82,87 @@ function Roadmap() {
             <RoadmapSwitcher />
           </header>
 
-          <RoadmapInfoSection />
-
-          <div className="mt-5 grid gap-5 xl:grid-cols-[380px_1fr]">
-            {stagesPending ? (
-              <section
-                className="animate-pulse rounded-md border bg-card p-5 shadow-sm"
-                aria-label="Loading roadmap stages"
-              >
-                <div className="h-5 w-32 rounded-sm bg-muted" />
-                <div className="mt-2 h-3 w-52 rounded-sm bg-muted" />
-                <div className="mt-5 space-y-3">
-                  {[1, 2, 3, 4, 5].map((item) => (
-                    <div key={item} className="h-18 rounded-sm bg-muted" />
-                  ))}
-                </div>
-              </section>
-            ) : stagesError ? (
-              <section className="rounded-md border border-destructive/20 bg-card p-5 shadow-sm">
-                <AlertCircle className="size-5 text-destructive" />
-                <h2 className="mt-3 text-sm font-semibold">
-                  Couldn’t load roadmap stages
-                </h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Try loading your stage progress again.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => refetchStages()}
-                  disabled={stagesFetching}
-                  className="mt-4 flex items-center gap-2 rounded-sm border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
-                >
-                  <RefreshCw
-                    className={`size-3.5 ${stagesFetching ? "animate-spin" : ""}`}
+          <div className="@container mt-5 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
+            <div className="grid overflow-hidden rounded-[8px] border bg-card shadow-sm xl:min-h-0 xl:flex-1 @4xl:grid-cols-[18rem_minmax(0,1fr)] @4xl:grid-rows-[minmax(0,1fr)_auto] @6xl:grid-cols-[19rem_minmax(0,1fr)_17rem] @6xl:grid-rows-[minmax(0,1fr)]">
+              <div className="flex min-h-0 flex-col border-b @4xl:col-start-1 @4xl:row-start-1 @4xl:border-b-0 @4xl:border-r">
+                {stagesPending ? (
+                  <div
+                    className="animate-pulse p-5"
+                    aria-label="Loading roadmap stages"
+                  >
+                    <div className="h-4 w-32 rounded-sm bg-muted" />
+                    <div className="mt-3 h-1.5 rounded-full bg-muted" />
+                    <div className="mt-6 space-y-4">
+                      {[1, 2, 3, 4, 5].map((item) => (
+                        <div key={item} className="flex items-center gap-3">
+                          <div className="size-8 shrink-0 rounded-full bg-muted" />
+                          <div className="h-8 flex-1 rounded-sm bg-muted" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : stagesError ? (
+                  <div className="p-5">
+                    <AlertCircle className="size-5 text-destructive" />
+                    <h2 className="mt-3 text-sm font-semibold">
+                      Couldn’t load roadmap stages
+                    </h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Try loading your stage progress again.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="mt-4"
+                      onClick={() => refetchStages()}
+                      disabled={stagesFetching}
+                    >
+                      <RefreshCw
+                        className={stagesFetching ? "animate-spin" : ""}
+                      />
+                      Try again
+                    </Button>
+                  </div>
+                ) : stages.length > 0 ? (
+                  <RoadmapStage
+                    stages={stages}
+                    selectedStageId={selectedStage?.stageId}
+                    onSelectStage={(stage) => setSelectedStageId(stage.stageId)}
                   />
-                  Try again
-                </button>
-              </section>
-            ) : stages.length > 0 ? (
-              <RoadmapStage
-                stages={stages}
-                selectedStageId={selectedStage?.stageId}
-                onSelectStage={(stage) => setSelectedStageId(stage.stageId)}
-              />
-            ) : (
-              <section className="rounded-md border bg-card p-5 shadow-sm">
-                <h2 className="text-sm font-semibold">
-                  No stages available yet
-                </h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Your roadmap stages will appear here once generated.
-                </p>
-              </section>
-            )}
-            <RoadmapStageContent
-              stageName={selectedStage?.stageName}
-              stageCode={selectedStage?.stageCode}
-              stageNumber={selectedStage?.stageSortOrder}
-              totalStages={orderedStages.length}
-              stageId={selectedStage?.stageId}
-              userRoadmapPublicId={selectedStage?.userRoadmapPublicId}
-              stageStatus={selectedStage?.stageStatus}
-              latestSessionPublicId={selectedStage?.latestSessionPublicId}
-              stageCompleted={
-                selectedStage?.stageCompleted ||
-                selectedStage?.stageStatus?.trim().toUpperCase() === "COMPLETED"
-              }
-            />
+                ) : (
+                  <div className="p-5">
+                    <h2 className="text-sm font-semibold">
+                      No stages available yet
+                    </h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Your roadmap stages will appear here once generated.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex min-h-0 min-w-0 flex-col @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1 @6xl:row-span-1">
+                <RoadmapStageContent
+                  stageName={selectedStage?.stageName}
+                  stageCode={selectedStage?.stageCode}
+                  stageNumber={selectedStage?.stageSortOrder}
+                  totalStages={orderedStages.length}
+                  stageId={selectedStage?.stageId}
+                  userRoadmapPublicId={selectedStage?.userRoadmapPublicId}
+                  stageStatus={selectedStage?.stageStatus}
+                  latestSessionPublicId={selectedStage?.latestSessionPublicId}
+                  stageCompleted={
+                    selectedStage?.stageCompleted ||
+                    selectedStage?.stageStatus?.trim().toUpperCase() ===
+                      "COMPLETED"
+                  }
+                />
+              </div>
+
+              <aside className="min-h-0 overflow-y-auto border-t bg-muted/25 @4xl:col-start-1 @4xl:row-start-2 @4xl:border-r @6xl:col-start-3 @6xl:row-start-1 @6xl:border-r-0 @6xl:border-t-0 @6xl:border-l">
+                <RoadmapInfoSection />
+              </aside>
+            </div>
           </div>
         </div>
       </main>

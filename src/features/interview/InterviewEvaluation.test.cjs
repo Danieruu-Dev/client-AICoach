@@ -18,6 +18,9 @@ function renderEvaluation(status, isError = false) {
     exports,
     require: name => {
       if (name.startsWith("@/assets/")) return { default: "test.png" };
+      if (name.startsWith("@/components/ui/")) {
+        return new Proxy({}, { get: () => props => React.createElement("div", null, props.children) });
+      }
       if (name === "./api/evaluationApi") return {};
       if (name === "./types/interviewTypes") {
         const types = {};

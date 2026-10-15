@@ -3,15 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthProviderContext";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  AlertCircle,
-  ArrowRight,
-  Clock3,
-  Map,
-  Play,
-  RefreshCw,
-  Sparkles,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, ArrowRight, Map, Play, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export interface UserRoadmapProgressResponse {
@@ -33,23 +27,22 @@ async function fetchRoadmapSummaryData(userId: string) {
 function RoadmapSkeleton() {
   return (
     <article
-      className="mt-7 overflow-hidden rounded-[8px] border bg-card shadow-sm"
+      className="overflow-hidden rounded-[8px] border bg-card shadow-sm"
       aria-label="Loading roadmap summary"
     >
-      <div className="grid animate-pulse lg:grid-cols-[minmax(0,1fr)_19rem]">
-        <div className="flex gap-6 p-5 sm:p-7">
-          <div className="h-36 w-30 shrink-0 rounded-xl bg-muted" />
+      <div className="animate-pulse">
+        <div className="flex gap-6 p-5 sm:p-6">
+          <div className="h-32 w-26 shrink-0 rounded-xl bg-muted" />
           <div className="flex-1 py-2">
             <div className="h-3 w-28 rounded bg-muted" />
             <div className="mt-4 h-7 w-52 rounded bg-muted" />
             <div className="mt-3 h-4 max-w-md rounded bg-muted" />
-            <div className="mt-7 h-10 w-36 rounded bg-muted" />
+            <div className="mt-6 h-10 w-36 rounded bg-muted" />
           </div>
         </div>
-        <div className="border-t bg-muted/20 p-7 lg:border-l lg:border-t-0">
-          <div className="h-4 w-24 rounded bg-muted" />
-          <div className="mt-4 h-9 w-28 rounded bg-muted" />
-          <div className="mt-6 h-2 rounded-full bg-muted" />
+        <div className="border-t bg-muted/20 px-5 py-4 sm:px-6">
+          <div className="h-4 w-32 rounded bg-muted" />
+          <div className="mt-3 h-2 rounded-full bg-muted" />
         </div>
       </div>
     </article>
@@ -73,7 +66,7 @@ function RoadmapSection() {
 
   if (isError && !roadmapNotFound) {
     return (
-      <article className="mt-7 rounded-[8px] border border-destructive/20 bg-card p-6 shadow-sm sm:p-7">
+      <article className="rounded-[8px] border border-destructive/20 bg-card p-6 shadow-sm sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <AlertCircle className="size-5" />
@@ -101,7 +94,7 @@ function RoadmapSection() {
 
   if (roadmapNotFound || !data) {
     return (
-      <article className="mt-7 overflow-hidden rounded-[8px] border bg-card shadow-sm">
+      <article className="overflow-hidden rounded-[8px] border bg-card shadow-sm">
         <div className="flex flex-col items-center px-6 py-10 text-center">
           <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Map className="size-5" />
@@ -132,82 +125,61 @@ function RoadmapSection() {
   const hasStarted =
     completed > 0 ||
     !["NOT_STARTED", "PENDING"].includes(data.status?.toUpperCase());
-  const difficulty = data.difficultyLevel
-    ? `${data.difficultyLevel.charAt(0).toUpperCase()}${data.difficultyLevel.slice(1).toLowerCase()} level`
-    : "Personalized difficulty";
 
   return (
-    <article className="mt-7 overflow-hidden rounded-[8px] border border-border bg-card shadow-sm">
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_19rem]">
-        <div className="flex flex-col gap-7 p-5 sm:flex-row sm:items-center sm:p-7">
-          <div className="flex items-center justify-center">
-            <img
-              src="/src/assets/preparo_sprites/adventure-preparo.png"
-              alt=""
-              className="h-45 w-37"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-              {hasStarted ? "Continue your roadmap" : "Start your roadmap"}
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-              {data.currentStageName || "Your first stage"}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {hasStarted
-                ? "Keep building momentum with the next part of your personalized preparation plan."
-                : "Your personalized interview preparation path is ready when you are."}
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-4">
-              <Button
-                asChild
-                className="h-10 rounded-[6px] bg-primary px-5 text-primary-foreground hover:bg-primary/90"
-              >
-                <Link to="/roadmap">
-                  <Play className="size-4 fill-current" />
-                  {hasStarted ? "Continue practice" : "Start practice"}
-                </Link>
-              </Button>
-              <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Sparkles className="size-4 text-[var(--preparo-teal)]" />
-                {difficulty}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-border bg-muted/25 p-5 sm:p-7 lg:border-l lg:border-t-0">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium">Roadmap progress</p>
-            <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
-              {data.status?.replaceAll("_", " ") || "Active"}
-            </span>
-          </div>
-          <p className="mt-3 text-3xl font-semibold tracking-tight">
-            {completed} / {total}
+    <article className="overflow-hidden rounded-[8px] border border-border bg-card shadow-sm">
+      <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:p-6">
+        <img
+          src="/src/assets/preparo_sprites/adventure-preparo.png"
+          alt=""
+          className="h-36 w-30 shrink-0 self-center object-contain"
+        />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            {hasStarted ? "Continue your roadmap" : "Start your roadmap"}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">stages completed</p>
-          <div
-            className="mt-5 h-2 overflow-hidden rounded-full bg-muted"
-            role="progressbar"
-            aria-label="Roadmap stage progress"
-            aria-valuemin={0}
-            aria-valuemax={total}
-            aria-valuenow={completed}
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+            {data.currentStageName || "Your first stage"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {hasStarted
+              ? "Keep building momentum with the next part of your personalized preparation plan."
+              : "Your personalized interview preparation path is ready when you are."}
+          </p>
+          <Button
+            asChild
+            className="mt-5 h-10 rounded-[6px] bg-primary px-5 text-sm text-primary-foreground hover:bg-primary/90"
           >
-            <div
-              className="h-full bg-[var(--preparo-teal)] transition-[width]"
-              style={{ width: `${progress}%` }}
-            />
+            <Link to="/roadmap">
+              <Play className="size-4 fill-current" />
+              {hasStarted ? "Continue practice" : "Start practice"}
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="border-t border-border bg-muted/25 px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">Roadmap progress</p>
+            <Badge
+              variant="secondary"
+              className="bg-primary/10 uppercase tracking-wide text-primary"
+            >
+              {data.status?.replaceAll("_", " ") || "Active"}
+            </Badge>
           </div>
-          <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
-            <Clock3 className="mt-0.5 size-3.5 shrink-0" />
+          <p className="text-xs text-muted-foreground">
             {progress === 100
               ? "Roadmap complete — excellent work."
-              : `${progress}% complete · Resume whenever you’re ready.`}
+              : `${completed} of ${total} stages completed · ${progress}%`}
           </p>
         </div>
+        <Progress
+          className="mt-3 h-2 rounded-full *:data-[slot=progress-indicator]:bg-(--preparo-teal)"
+          value={progress}
+          aria-label="Roadmap stage progress"
+        />
       </div>
     </article>
   );

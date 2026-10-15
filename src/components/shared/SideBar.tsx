@@ -51,6 +51,8 @@ const navItems: NavItem[] = [
   { label: "Settings", icon: Settings, path: "/settings" },
 ];
 
+const COLLAPSED_STORAGE_KEY = "sidebar-collapsed";
+
 function SideBar({
   userName,
   email,
@@ -62,10 +64,29 @@ function SideBar({
   const { theme } = useTheme();
   const auth = useAuth();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Each page mounts its own SideBar, so the collapsed state is persisted to
+  // survive navigation.
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(COLLAPSED_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
   const [mobileOpenPathname, setMobileOpenPathname] = useState<string | null>(
     null,
   );
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  const toggleCollapsed = () => {
+    const next = !isCollapsed;
+    setIsCollapsed(next);
+    try {
+      localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
+    } catch {
+      // Storage may be unavailable; the toggle still works for this page.
+    }
+  };
 
   const authUserName =
     `${auth?.user?.firstName ?? ""} ${auth?.user?.lastName ?? ""}`.trim();
@@ -87,9 +108,16 @@ function SideBar({
       ? "/preparo_typo_light.png"
       : "/preparo_typo_dark.png";
 
+  const initials =
+    resolvedUserName
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join("") || "?";
+
   const navItemBaseClass = cn(
-    "flex items-center gap-3 rounded-sm px-4 py-3 text-left text-[13px] font-medium transition-all focus:outline-none focus:ring-2 focus:ring-sidebar-ring/30",
-    isCollapsed && "lg:justify-center lg:gap-0 lg:px-2",
+    "flex h-10 items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/40",
+    isCollapsed && "lg:justify-center lg:gap-0 lg:px-0",
   );
 
   const labelClass = isCollapsed ? "lg:hidden" : "lg:block";
@@ -134,53 +162,46 @@ function SideBar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex h-screen w-70 flex-col border-r border-sidebar-border bg-sidebar px-3 py-3 text-sidebar-foreground shadow-lg transition-all duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:shadow-none lg:shrink-0",
-          isCollapsed ? "lg:w-20 lg:px-2" : "lg:w-70",
+          "fixed inset-y-0 left-0 z-40 flex h-screen w-70 flex-col border-r border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-lg transition-[width,translate] duration-200 ease-out lg:sticky lg:top-0 lg:h-screen lg:shadow-none lg:shrink-0",
+          isCollapsed ? "lg:w-16" : "lg:w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="flex items-center justify-between gap-3 px-1 relative">
-          <div
-            className={cn(
-              "flex items-start gap-3 transition-all duration-200",
-              isCollapsed && "lg:flex-col lg:items-center lg:gap-2 relative",
-            )}
-          >
+        <button
+          type="button"
+          className="absolute -right-3 top-6 z-10 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground/70 shadow-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/40 lg:inline-flex"
+          onClick={toggleCollapsed}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!isCollapsed}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="size-3.5" />
+          ) : (
+            <ChevronLeft className="size-3.5" />
+          )}
+        </button>
+
+        <div
+          className={cn(
+            "flex h-10 items-center justify-between gap-2 px-1",
+            isCollapsed && "lg:justify-center lg:px-0",
+          )}
+        >
+          <div className="flex min-w-0 items-center gap-2">
             <img
               src="/icon-preparo.png"
               alt="Preparo logo"
-              className={cn(
-                "h-10 w-10 rounded-xl object-contain shrink-0 max-w-none",
-                isCollapsed &&
-                  "absolute left-0 top-4 -translate-x-1/2 lg:static lg:translate-x-0",
-              )}
+              className="size-9 max-w-none shrink-0 object-contain"
             />
             <img
               src={brandLogo}
               alt="Preparo"
               className={cn(
-                "h-10 w-auto select-none object-contain transition-all duration-200",
+                "h-8 w-auto select-none object-contain",
                 isCollapsed && "lg:hidden",
               )}
             />
           </div>
-
-          <button
-            type="button"
-            className={cn(
-              "hidden rounded-md p-2 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:inline-flex bg-sidebar cursor-pointer",
-              isCollapsed && "border border-sidebar-border ",
-            )}
-            onClick={() => setIsCollapsed((value) => !value)}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-expanded={!isCollapsed}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="size-4" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
-          </button>
 
           <button
             type="button"
@@ -192,9 +213,22 @@ function SideBar({
           </button>
         </div>
 
-        <Separator className="mt-1 mb-4 bg-sidebar-border" />
+        <p
+          className={cn(
+            "mb-2 mt-6 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/50",
+            isCollapsed && "lg:hidden",
+          )}
+        >
+          Menu
+        </p>
+        <Separator
+          className={cn(
+            "my-4 hidden bg-sidebar-border",
+            isCollapsed && "lg:block",
+          )}
+        />
 
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
 
@@ -205,8 +239,8 @@ function SideBar({
                 className={cn(
                   navItemBaseClass,
                   item.label === pageName
-                    ? "bg-primary text-sidebar-primary-foreground shadow-none"
-                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    ? "bg-primary/10 text-primary"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )}
                 aria-current={item.label === pageName ? "page" : undefined}
                 title={isCollapsed ? item.label : undefined}
@@ -219,38 +253,49 @@ function SideBar({
           })}
         </nav>
 
-        <div className="pt-4">
+        <div className="border-t border-sidebar-border pt-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-sm px-3 py-3 text-left text-sidebar-accent-foreground shadow-none transition-colors hover:bg-sidebar-accent/80",
-                  isCollapsed && "lg:justify-center lg:px-2",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/40",
+                  isCollapsed && "lg:justify-center lg:p-0.5",
                 )}
+                title={isCollapsed ? resolvedUserName : undefined}
               >
-                <img
-                  src={resolvedAvatarUrl}
-                  alt={resolvedUserName}
-                  className="h-11 w-11 rounded-xl border border-sidebar-border object-cover"
-                />
+                {avatarFailed ? (
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+                    aria-hidden="true"
+                  >
+                    {initials}
+                  </span>
+                ) : (
+                  <img
+                    src={resolvedAvatarUrl}
+                    alt=""
+                    className="size-9 shrink-0 rounded-full border border-sidebar-border object-cover"
+                    onError={() => setAvatarFailed(true)}
+                  />
+                )}
                 <div className={cn("min-w-0 flex-1", labelClass)}>
-                  <div className="truncate text-[15px] font-semibold leading-tight">
+                  <div className="truncate text-sm font-semibold leading-tight">
                     {resolvedUserName}
                   </div>
-                  <div className="truncate text-[13px] text-sidebar-foreground/70">
+                  <div className="mt-0.5 truncate text-xs text-sidebar-foreground/60">
                     {resolvedEmail}
                   </div>
                 </div>
                 <ChevronDown
                   className={cn(
-                    "size-4 text-sidebar-foreground/70",
+                    "size-4 shrink-0 text-sidebar-foreground/60",
                     isCollapsed && "lg:hidden",
                   )}
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="start" side="top" className="w-56">
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem

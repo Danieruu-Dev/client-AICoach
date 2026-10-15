@@ -94,7 +94,7 @@ function Interview() {
   return (
     <main className="h-dvh overflow-y-auto bg-muted/20 p-4 text-foreground lg:overflow-hidden">
       <div className="mx-auto flex min-h-full max-w-6xl flex-col lg:h-full lg:min-h-0">
-        <header className="grid min-h-17 shrink-0 items-center gap-3 rounded-md border bg-card px-4 py-3 shadow-sm sm:grid-cols-[1fr_auto_1fr] sm:px-6">
+        <header className="grid min-h-17 shrink-0 items-center gap-3 rounded-[8px] border bg-card px-4 py-3 shadow-sm sm:grid-cols-[1fr_auto_1fr] sm:px-6">
           <Link
             to="/roadmap"
             className="flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -116,7 +116,7 @@ function Interview() {
           </div>
 
           {isEvaluationRoute ? <span className="rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-600 sm:justify-self-end">Answers submitted</span> : <div className="flex items-center gap-3 sm:justify-self-end">
-            <span className="flex size-9 items-center justify-center rounded-sm bg-primary/10 text-primary">
+            <span className="flex size-9 items-center justify-center rounded-md bg-primary/8 text-primary">
               <Clock3 className="size-4" />
             </span>
 

@@ -1,16 +1,11 @@
 import api from "@/api/axios";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthProviderContext";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  AlertCircle,
-  ArrowRight,
-  BarChart3,
-  RefreshCw,
-  Target,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { toProperCase, formatExperience } from "@/utils/textFormatter";
 
 export interface UserRoadmapProfileResponse {
@@ -72,21 +67,20 @@ function RoadmapInfoSection() {
     retry: 1,
   });
 
+  const heading = (
+    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      Target profile
+    </p>
+  );
+
   if (isPending) {
     return (
-      <section
-        className="mt-6 animate-pulse rounded-md border bg-card p-6 shadow-sm"
-        aria-label="Loading roadmap profile"
-      >
-        <div className="flex gap-5">
-          <div className="size-20 shrink-0 rounded-md bg-muted" />
-          <div className="flex-1">
-            <div className="h-6 w-52 rounded-sm bg-muted" />
-            <div className="mt-4 h-4 max-w-xl rounded-sm bg-muted" />
-            <div className="mt-3 h-4 max-w-md rounded-sm bg-muted" />
-          </div>
-        </div>
-      </section>
+      <div className="animate-pulse p-5" aria-label="Loading roadmap profile">
+        <div className="h-3 w-24 rounded-sm bg-muted" />
+        <div className="mt-4 h-5 w-40 rounded-sm bg-muted" />
+        <div className="mt-3 h-5 w-32 rounded-sm bg-muted" />
+        <div className="mt-6 h-16 rounded-sm bg-muted" />
+      </div>
     );
   }
 
@@ -94,106 +88,83 @@ function RoadmapInfoSection() {
 
   if (isError && !notFound) {
     return (
-      <section className="mt-6 rounded-md border border-destructive/20 bg-card p-5 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <AlertCircle className="size-5 shrink-0 text-destructive" />
-          <div className="flex-1">
-            <h2 className="text-sm font-semibold">
-              Couldn’t load roadmap information
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Check your connection and try again.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="h-8"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={isFetching ? "animate-spin" : ""} />
-            Try again
-          </Button>
-        </div>
-      </section>
+      <div className="p-5">
+        {heading}
+        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+          <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+          Couldn’t load roadmap information. Check your connection and try
+          again.
+        </p>
+        <Button
+          variant="outline"
+          size="lg"
+          className="mt-3"
+          onClick={() => refetch()}
+          disabled={isFetching}
+        >
+          <RefreshCw className={isFetching ? "animate-spin" : ""} />
+          Try again
+        </Button>
+      </div>
     );
   }
 
   if (notFound || !data) {
     return (
-      <section className="mt-6 rounded-md border bg-card p-6 text-center shadow-sm">
-        <Target className="mx-auto size-6 text-muted-foreground" />
-        <h2 className="mt-3 text-sm font-semibold">No roadmap profile yet</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Complete your preparation goal to generate this information.
+      <div className="p-5">
+        {heading}
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">
+          No roadmap profile yet. Complete your preparation goal to generate
+          this information.
         </p>
-      </section>
+      </div>
     );
   }
 
   const technologies = getTechnologyNames(data.preparationGoalTech);
+  const facts = [
+    {
+      label: "Experience",
+      value: formatExperience(data.codingExperienceLevel || "Not specified"),
+    },
+    {
+      label: "Status",
+      value: toProperCase(data.currentStatus || "Not specified"),
+    },
+    { label: "Industry", value: data.targetIndustry || "Not specified" },
+  ];
 
   return (
-    <section className="mt-6 overflow-hidden rounded-md border bg-card shadow-sm">
-      <div className="grid gap-6 py-4 px-5 sm:py-5 sm:px-6 xl:grid-cols-[1fr_auto] xl:items-center">
-        <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="flex size-20 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
-            <Target className="size-11" strokeWidth={1.6} />
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold">
-                {data.role || "Target role"}
-              </h2>
-              <span className="rounded-sm bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
-                Primary hard coded
-              </span>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {technologies.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-md border bg-background px-2.5 py-1 text-xs text-muted-foreground"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
+    <div className="p-5">
+      {heading}
+      <h3 className="mt-3 text-base font-semibold tracking-tight">
+        {data.role || "Target role"}
+      </h3>
+      <Badge variant="secondary" className="mt-2 bg-primary/10 text-primary">
+        Primary hard coded
+      </Badge>
+      {technologies.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {technologies.map((item) => (
+            <Badge key={item} variant="outline" className="bg-card">
+              {item}
+            </Badge>
+          ))}
         </div>
-
-        <div className="grid gap-4 bg-muted/15 p-4 sm:grid-cols-3 xl:min-w-150 xl:border-l">
-          <div>
-            <p className="text-xs text-muted-foreground">Experience level</p>
-            <p className="mt-1 text-sm font-medium">
-              {formatExperience(
-                data.codingExperienceLevel || "Not specified",
-              )}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Current status</p>
-            <p className="mt-1 text-sm font-medium">
-              {toProperCase(data.currentStatus || "Not specified")}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Target Industry</p>
-            <p className="mt-1 text-sm font-medium">
-              {data.targetIndustry || "Not specified"}
-            </p>
-          </div>
-          <Link
-            to="/performance"
-            className="group flex items-center justify-center gap-2 rounded-sm bg-foreground px-4 py-2.5 text-xs font-medium text-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:col-span-3"
+      )}
+      <Separator className="my-4" />
+      <dl className="space-y-3 text-xs">
+        {facts.map((fact) => (
+          <div
+            key={fact.label}
+            className="flex items-baseline justify-between gap-4"
           >
-            <BarChart3 className="size-4" />
-            Go to Performance
-            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </div>
-    </section>
+            <dt className="text-muted-foreground">{fact.label}</dt>
+            <dd className="text-right font-medium">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
