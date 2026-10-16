@@ -1,20 +1,23 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProviderContext";
 
 /**
  * Protects routes that require authentication. If not authenticated,
- * redirects to the authentication page.
+ * sends the user to the Keycloak login page and returns them here afterwards.
  */
 function ProtectedRoutes() {
   const auth = useAuth();
+  const location = useLocation();
   const isAuthenticated = auth?.isAuthenticated ?? false;
 
-  return isAuthenticated ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/authentication" replace />
-  );
+  useEffect(() => {
+    if (!isAuthenticated) {
+      auth?.login(location.pathname + location.search);
+    }
+  }, [auth, isAuthenticated, location.pathname, location.search]);
+
+  return isAuthenticated ? <Outlet /> : <div>Redirecting to login...</div>;
 }
 
 /**

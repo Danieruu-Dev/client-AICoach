@@ -3,8 +3,6 @@ import Dashboard from "./pages/Dashboard";
 import Authentication from "./pages/Authentication";
 import ProtectedRoutes, { PublicRoute } from "./routes/ProtectedRoutes";
 import NotFound from "./pages/NotFound";
-import Verification from "./features/authentication/Verification";
-import VerificationSuccess from "./features/authentication/VerificationSuccess";
 import Home from "./pages/Home";
 // import Onboarding from "./pages/Onboarding";
 // import NotAvailable from "./pages/NotAvailable";
@@ -16,6 +14,7 @@ import Interview from "./pages/Interview";
 import InterviewPreflight from "./features/interview/InterviewPreflight";
 import InterviewQuestion from "./features/interview/InterviewQuestion";
 import InterviewEvaluation from "./features/interview/InterviewEvaluation";
+import AuthCallback from "./routes/AuthCallback";
 
 function App() {
   return (
@@ -23,12 +22,9 @@ function App() {
       <Routes>
         <Route path="*" element={<NotFound />} />
         <Route path="/" element={<Home />} />
-        <Route path="/verification/:id" element={<Verification />} />
         {/* <Route path="/not-available" element={<NotAvailable />} /> */}
-        <Route
-          path="/verification/success/:id"
-          element={<VerificationSuccess />}
-        />
+
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         <Route
           path="/authentication"

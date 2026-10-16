@@ -1,29 +1,22 @@
-import Login from "@/features/authentication/Login";
-import Register from "@/features/authentication/Register";
-import React from "react";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthProviderContext";
 
+// Login and registration are handled by Keycloak; this page only forwards there
 function Authentication() {
-  const [isActive, setIsActive] = React.useState<"login" | "register">(
-    localStorage.getItem("activePage") === "register" ? "register" : "login",
-  );
+  const auth = useAuth();
 
-  const handleActivePageChange = (active: "login" | "register") => {
-    localStorage.setItem("activePage", active);
-    setIsActive(active);
-  };
+  useEffect(() => {
+    if (localStorage.getItem("activePage") === "register") {
+      auth?.register();
+    } else {
+      auth?.login();
+    }
+  }, [auth]);
 
   return (
-    <>
-      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-        <div className="flex w-full max-w-sm flex-col gap-6">
-          {isActive === "login" ? (
-            <Login handleActivePageChange={handleActivePageChange} />
-          ) : (
-            <Register handleActivePageChange={handleActivePageChange} />
-          )}
-        </div>
-      </div>
-    </>
+    <div className="flex min-h-svh items-center justify-center bg-muted p-6">
+      Redirecting...
+    </div>
   );
 }
 

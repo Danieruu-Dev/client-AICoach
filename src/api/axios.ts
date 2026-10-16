@@ -1,19 +1,18 @@
 import axios from "axios";
-import { getAccessToken, setAccessToken } from "../utils/authToken";
+import { userManager } from "./keycloak";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const accessToken = getAccessToken();
+api.interceptors.request.use(async (config) => {
+  const user = await userManager.getUser();
 
-  if (accessToken) {
+  if (user?.access_token && !user.expired) {
     config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${accessToken}`;
+    config.headers.Authorization = `Bearer ${user.access_token}`;
   }
 
   return config;
@@ -23,17 +22,11 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const requestPath = originalRequest?.url ?? "";
-    const isAuthEndpoint =
-      requestPath.includes("/api/auth/login") ||
-      requestPath.includes("/api/auth/register") ||
-      requestPath.includes("/api/auth/refresh");
 
     if (
       error.response?.status !== 401 ||
       !originalRequest ||
-      originalRequest._retry ||
-      isAuthEndpoint
+      originalRequest._retry
     ) {
       return Promise.reject(error);
     }
@@ -41,23 +34,15 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      const refreshResponse = await axios.post(
-        `${API_URL}/api/auth/refresh`,
-        {},
-        {
-          withCredentials: true,
-        },
-      );
-
-      const newAccessToken = refreshResponse.data.access_token;
-      setAccessToken(newAccessToken);
+      // Token was rejected or expired: get a fresh one from Keycloak and retry once
+      const user = await userManager.signinSilent();
+      if (!user) return Promise.reject(error);
 
       originalRequest.headers = originalRequest.headers ?? {};
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${user.access_token}`;
 
       return api(originalRequest);
     } catch (refreshError) {
-      setAccessToken(null);
       return Promise.reject(refreshError);
     }
   },
