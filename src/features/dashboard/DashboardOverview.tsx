@@ -3,13 +3,11 @@ import {
   // Braces,
   CheckCircle2,
   // CircleUserRound,
-  Code2,
   Flame,
   // GitBranch,
   // Layers3,
   // MessageCircleMore,
   // ServerCog,
-  Target,
   Trophy,
 } from "lucide-react";
 
@@ -19,7 +17,7 @@ import RoadmapSection from "./RoadmapSection";
 import MetricCard from "@/features/dashboard/components/MetricCard";
 // import PracticeInterviewSection from "./PracticeInterviewSection";
 import RecentActivitySection from "./RecentActivitySection";
-import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
+// import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
 
 type RoadmapOverviewProps = {
   firstName?: string;
@@ -37,27 +35,6 @@ type RoadmapOverviewProps = {
 //     icon: MessageCircleMore,
 //   },
 // ];
-
-const recentActivity = [
-  {
-    title: "Roadmap generated",
-    description: "Full Stack Developer",
-    time: "Today",
-    icon: Target,
-  },
-  {
-    title: "Preparation goal created",
-    description: "Technology & SaaS",
-    time: "Today",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Skills added",
-    description: "Your roadmap is ready",
-    time: "Today",
-    icon: Code2,
-  },
-];
 
 export default function RoadmapOverview({ firstName }: RoadmapOverviewProps) {
   const displayName = firstName?.trim() || "there";
@@ -80,7 +57,7 @@ export default function RoadmapOverview({ firstName }: RoadmapOverviewProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <RoadmapSwitcher />
+            {/* <RoadmapSwitcher /> */}
             {/* <ModeToggle /> */}
           </div>
         </header>
@@ -124,7 +101,7 @@ export default function RoadmapOverview({ firstName }: RoadmapOverviewProps) {
           </div>
 
           <div className="overflow-hidden rounded-[8px] border bg-card shadow-sm">
-            <RecentActivitySection recentActivity={recentActivity} />
+            <RecentActivitySection />
           </div>
         </div>
       </div>

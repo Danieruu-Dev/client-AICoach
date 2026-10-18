@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
 import Dashboard from "./pages/Dashboard";
-import Authentication from "./pages/Authentication";
-import ProtectedRoutes, { PublicRoute } from "./routes/ProtectedRoutes";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 // import Onboarding from "./pages/Onboarding";
@@ -26,14 +25,8 @@ function App() {
 
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        <Route
-          path="/authentication"
-          element={
-            <PublicRoute>
-              <Authentication />
-            </PublicRoute>
-          }
-        />
+        {/* Login/register now redirect straight to Keycloak; kept so old links don't 404 */}
+        <Route path="/authentication" element={<Navigate to="/" replace />} />
 
         <Route element={<ProtectedRoutes />}>
           <Route element={<OnboardingRoute />}>

@@ -1,6 +1,6 @@
 import api from "@/api/axios";
 import SideBar from "@/components/shared/SideBar";
-import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
+// import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthProviderContext";
 
@@ -79,7 +79,7 @@ function Roadmap() {
                 dream role.
               </p>
             </div>
-            <RoadmapSwitcher />
+            {/* <RoadmapSwitcher /> */}
           </header>
 
           <div className="@container mt-5 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">

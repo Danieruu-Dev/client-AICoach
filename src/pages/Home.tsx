@@ -1,92 +1,85 @@
-// import ModeToggle from "@/components/mode-toggle";
+import { ArrowRight, CircleCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/shared/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CircleCheck, CirclePlay } from "lucide-react";
+import { useAuth } from "@/context/AuthProviderContext";
+import ProductPreview from "@/features/landing/ProductPreview";
+import {
+  CtaSection,
+  FeaturesSection,
+  HowItWorksSection,
+  LandingFooter,
+} from "@/features/landing/LandingSections";
+import twinkle from "@/assets/bg_design/twinkle.png";
+
+const highlights = ["No credit card required", "Instant setup", "Cancel anytime"];
 
 function Home() {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const isSignedIn = auth?.isAuthenticated ?? false;
+
+  const handleStart = () => (isSignedIn ? navigate("/dashboard") : auth?.register());
+
   return (
-    <div>
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <main className="container mx-auto px-4 pt-20 h-screen sm:px-6 lg:px-8">
-        {/* <ModeToggle /> */}
 
-        <section className="mb-3 flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12 py-6  overflow-hidden">
-          <div className="relative isolate w-full flex-1 text-center lg:text-left">
-            <div className="absolute left-1/2 top-12 -z-10 h-28 w-28 -translate-x-1/2 rounded-full bg-teal-400/10 blur-3xl sm:h-36 sm:w-36 lg:hidden" />
-            <div className="absolute right-6 top-24 -z-10 hidden h-20 w-20 rounded-full bg-amber-300/15 blur-2xl lg:block" />
+      <main className="mx-auto max-w-6xl px-4 sm:px-6">
+        {/* Hero */}
+        <section className="grid items-center gap-16 pt-14 pb-20 sm:pt-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12 lg:pt-24">
+          <div className="text-center lg:text-left">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium shadow-sm">
+              <img src={twinkle} alt="" className="h-4 w-5 object-contain" />
+              AI-powered interview practice
+            </span>
 
-            <div className="mx-auto inline-flex max-w-[18rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-[20px] bg-[#FFF2D6] px-2 py-1 text-center text-[13px] font-medium leading-snug text-black sm:max-w-72 lg:mx-0 lg:inline-flex lg:text-[14px]">
-              <img
-                src="/src/assets/bg_design/twinkle.png"
-                alt="Twinkle"
-                className="h-5 w-7 shrink-0 object-contain"
-              />
-              <div className="leading-tight">AI-Powered Interview Practice</div>
-            </div>
+            <h1 className="mt-6 text-5xl leading-[1.02] font-semibold tracking-tight sm:text-6xl">
+              <span className="text-primary">Practice smarter.</span>
+              <br />
+              <span className="text-(--preparo-teal)">Interview better.</span>
+            </h1>
 
-            <div className="mt-5 flex flex-col gap-2 text-[2.5rem] font-bold leading-[0.92] sm:text-5xl lg:text-[5rem]">
-              <div className="text-primary">Practice smarter.</div>
-              <div className="text-[#1AAFAD]">Interview better.</div>
-            </div>
-            <div className="mx-auto mt-5 flex max-w-xl flex-col gap-4 text-[15px] font-medium leading-6 text-muted-foreground sm:text-[16px] lg:mx-0">
-              <span>Realistic interviews. Instant AI feedback.</span>
-              <span>
-                Practice anytime, anywhere. Your path to interview success
-                starts here.
-              </span>
-            </div>
+            <p className="mx-auto mt-6 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg lg:mx-0">
+              Realistic interviews with instant AI feedback, and a roadmap built
+              around the job you want. Practice anytime, anywhere.
+            </p>
 
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
-              <Button className="h-10 rounded-sm bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-primary/90">
-                Get Started Free
-                <ArrowRight stroke-width={3} className="ml-1" />
+            <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <Button onClick={handleStart} className="h-11 rounded-[6px] px-6 text-sm">
+                {isSignedIn ? "Go to dashboard" : "Get started free"}
+                <ArrowRight className="size-4" />
               </Button>
-
-              <Button
-                variant="outline"
-                className="h-10 rounded-sm border-border bg-background px-4 text-sm font-semibold hover:bg-muted/50"
-              >
-                View demo
-                <CirclePlay stroke-width={2} className="ml-1 size-5.2" />
+              <Button asChild variant="outline" className="h-11 rounded-[6px] px-6 text-sm">
+                <a href="#how-it-works">See how it works</a>
               </Button>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 text-[15px] sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <div className="flex items-center justify-center gap-2 sm:justify-start">
-                <CircleCheck className="text-[#1AAFAD] w-5 h-5" />
-                <span className="text-muted-foreground">
-                  No credit card required.
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 sm:justify-start">
-                <CircleCheck className="text-[#1AAFAD] w-5 h-5" />
-                <span className="text-muted-foreground">Instant setup</span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 sm:justify-start">
-                <CircleCheck className="text-[#1AAFAD] w-5 h-5" />
-                <span className="text-muted-foreground">Cancel anytime</span>
-              </div>
-            </div>
+            <ul className="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start">
+              {highlights.map((item) => (
+                <li key={item} className="flex items-center gap-1.5">
+                  <CircleCheck className="size-4 text-(--preparo-teal)" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className=" w-full flex-1 lg:flex flex justify-items-start">
-            <div className="relative aspect-square w-full max-w-[20rem] sm:max-w-104 lg:max-w-136">
-              <img
-                src="/src/assets/bg_design/elipse.png"
-                alt=""
-                className="absolute inset-x-[50%] top-[8%] z-10 h-auto w-[72%] rotate-[-20deg] object-contain"
-              />
-              <img
-                src="/src/assets/preparo_sprites/happy-checklist-preparo.png"
-                alt="Happy Checklist Preparo"
-                className="relative z-20 h-full w-full object-contain"
-              />
-            </div>
-          </div>
+
+          <ProductPreview />
         </section>
-        {/* <footer>Soon</footer> */}
+
+        <div className="border-t" />
+        <HowItWorksSection />
+        <div className="border-t" />
+        <FeaturesSection />
+        <CtaSection
+          onStart={handleStart}
+          onLogin={() => auth?.login()}
+          isSignedIn={isSignedIn}
+        />
       </main>
+
+      <LandingFooter />
     </div>
   );
 }

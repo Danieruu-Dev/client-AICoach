@@ -1,3 +1,4 @@
+import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,9 +15,9 @@ function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="w-28 justify-between">
-          <span>Theme</span>
-          <span className="text-muted-foreground">{theme}</span>
+        <Button variant="ghost" size="icon-lg" aria-label={`Theme: ${theme}`}>
+          <Sun className="size-4 dark:hidden" aria-hidden="true" />
+          <Moon className="hidden size-4 dark:block" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-36">

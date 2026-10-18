@@ -1,8 +1,17 @@
-import { SelectField } from "@/components/shared/SelectFields";
-import { Gauge, Info } from "lucide-react";
+import {
+  BadgeCheck,
+  Briefcase,
+  Code2,
+  GraduationCap,
+  Search,
+  ShieldCheck,
+  Shuffle,
+  type LucideIcon,
+} from "lucide-react";
 import type { ProfileState } from "@/pages/Onboarding";
-import { cn } from "@/lib/utils";
+import { ChoiceCards, ChoicePills } from "./components/ChoiceGroups";
 
+// ids must match the server's CurrentStatus / CodingExperience enums
 const currentStatusOptions = [
   { id: "STUDENT", name: "Student" },
   { id: "FRESH_GRADUATE", name: "Fresh Graduate" },
@@ -11,6 +20,15 @@ const currentStatusOptions = [
   { id: "UNEMPLOYED", name: "Unemployed" },
   { id: "EMPLOYED_LOOKING", name: "Employed but Looking" },
 ];
+
+const statusMeta: Record<string, { icon: LucideIcon; description: string }> = {
+  STUDENT: { icon: GraduationCap, description: "Still in school or a bootcamp" },
+  FRESH_GRADUATE: { icon: BadgeCheck, description: "Recently finished your studies" },
+  CAREER_SHIFTER: { icon: Shuffle, description: "Moving into tech from another field" },
+  JUNIOR_DEVELOPER: { icon: Code2, description: "Early in your developer career" },
+  UNEMPLOYED: { icon: Search, description: "Between jobs and job hunting" },
+  EMPLOYED_LOOKING: { icon: Briefcase, description: "Working, but open to a new role" },
+};
 
 const codingExperienceOptions = [
   { id: "LESS_THAN_6_MONTHS", name: "Less than 6 months" },
@@ -29,99 +47,36 @@ export function OnboardingProfile({
   setProfile: React.Dispatch<React.SetStateAction<ProfileState>>;
   showValidationError: boolean;
 }) {
-  const profileErrors = {
-    currentStatus: showValidationError && !profile.currentStatus,
-    codingExperience: showValidationError && !profile.codingExperience,
-  };
-
   return (
-    <div className="mx-auto w-full max-w-3xl rounded-2xl border border-border/70 bg-card/90 p-4 shadow-sm backdrop-blur-sm md:p-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-primary md:text-2xl">
-          👋 Let&apos;s get to know you!
-        </h1>
-        <p className="text-sm text-muted-foreground md:text-[15px]">
-          This helps us personalize your practice experience.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <ChoiceCards
+        label="Where are you right now?"
+        options={currentStatusOptions}
+        value={profile.currentStatus}
+        onChange={(value) =>
+          setProfile((prev) => ({ ...prev, currentStatus: value }))
+        }
+        getMeta={(option) => statusMeta[option.id]}
+        invalid={showValidationError}
+        errorMessage="Choose the option that fits you best."
+      />
 
-      <div className="mt-6 space-y-4">
-        {showValidationError && (
-          <p className="text-sm text-destructive">
-            Complete all required fields to proceed to the next step.
-          </p>
-        )}
-        <div className="grid gap-4 md:grid-cols-2">
-          <SelectField
-            label="Current status"
-            placeholder="Select Status"
-            icon={<Info className="size-4" />}
-            value={profile.currentStatus}
-            onChange={(value) =>
-              setProfile({ ...profile, currentStatus: value })
-            }
-            options={Object.values(currentStatusOptions)}
-            className={cn(
-              profileErrors.currentStatus &&
-                "border-destructive focus-visible:ring-destructive",
-            )}
-          />
-          <SelectField
-            label="Experience level"
-            placeholder="Select Experience"
-            icon={<Gauge className="size-4" />}
-            value={profile.codingExperience}
-            onChange={(value) =>
-              setProfile({ ...profile, codingExperience: value })
-            }
-            options={Object.values(codingExperienceOptions)}
-            className={cn(
-              profileErrors.codingExperience &&
-                "border-destructive focus-visible:ring-destructive",
-            )}
-          />
-        </div>
+      <ChoicePills
+        label="How long have you been coding?"
+        hint="Include school, bootcamps, and personal projects."
+        options={codingExperienceOptions}
+        value={profile.codingExperience}
+        onChange={(value) =>
+          setProfile((prev) => ({ ...prev, codingExperience: value }))
+        }
+        invalid={showValidationError}
+        errorMessage="Pick your coding experience."
+      />
 
-        <p className="text-xs text-muted-foreground">
-          We&apos;ll use this to show relevant opportunities and insights.
-        </p>
-
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3.5 text-emerald-950">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-full bg-emerald-500/15 p-2 text-emerald-600">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="size-4"
-              >
-                <path
-                  d="M12 2 4 5.5v6.2c0 4.8 3.2 9.2 8 10.3 4.8-1.1 8-5.5 8-10.3V5.5L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="m9.5 12 1.9 1.9 3.6-4"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-emerald-700">
-                Your privacy matters
-              </div>
-              <p className="mt-1 text-sm text-emerald-700/90">
-                Your information is secure and will only be used to personalize
-                your experience.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="flex items-start gap-2 rounded-[8px] bg-muted/40 px-3.5 py-3 text-xs leading-5 text-muted-foreground">
+        <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
+        We use this only to set the difficulty and focus of your practice.
+      </p>
     </div>
   );
 }
