@@ -1,20 +1,16 @@
-import {
-  BarChart3,
-  // Braces,
-  CheckCircle2,
-  // CircleUserRound,
-  Flame,
-  // GitBranch,
-  // Layers3,
-  // MessageCircleMore,
-  // ServerCog,
-  Trophy,
-} from "lucide-react";
+// import {
+//   Braces,
+//   CircleUserRound,
+//   GitBranch,
+//   Layers3,
+//   MessageCircleMore,
+//   ServerCog,
+// } from "lucide-react";
 
 // import ModeToggle from "@/components/mode-toggle";
 
 import RoadmapSection from "./RoadmapSection";
-import MetricCard from "@/features/dashboard/components/MetricCard";
+import MetricsSection from "./MetricsSection";
 // import PracticeInterviewSection from "./PracticeInterviewSection";
 import RecentActivitySection from "./RecentActivitySection";
 // import RoadmapSwitcher from "@/components/shared/RoadmapSwitcher";
@@ -67,33 +63,7 @@ export default function RoadmapOverview({ firstName }: RoadmapOverviewProps) {
             <RoadmapSection />
 
             {/* Roadmap Metrics */}
-            <div className="grid gap-px overflow-hidden rounded-[8px] border bg-border shadow-sm sm:grid-cols-2 2xl:grid-cols-4">
-              <MetricCard
-                icon={BarChart3}
-                label="Overall progress"
-                value="0%"
-                detail="0 of 25 questions"
-                progress={0}
-              />
-              <MetricCard
-                icon={CheckCircle2}
-                label="Questions answered"
-                value="0"
-                detail="Across all stages"
-              />
-              <MetricCard
-                icon={Trophy}
-                label="Average score"
-                value="—"
-                detail="Complete a question to begin"
-              />
-              <MetricCard
-                icon={Flame}
-                label="Current streak"
-                value="0 days"
-                detail="Start practicing today"
-              />
-            </div>
+            <MetricsSection />
 
             {/* <div className="overflow-hidden rounded-[8px] border bg-card shadow-sm">
               <PracticeInterviewSection practiceOptions={practiceOptions} />

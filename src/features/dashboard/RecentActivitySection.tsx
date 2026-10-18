@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   AlertCircle,
-  ArrowRight,
+  // ArrowRight,
   CirclePlay,
   Flag,
   MessageSquareText,
@@ -90,10 +90,11 @@ function RecentActivitySection() {
             Your latest preparation updates
           </p>
         </div>
+        {/* Hidden until there is a full activity page to link to
         <Button variant="ghost" size="lg" className="text-muted-foreground">
           View all
           <ArrowRight />
-        </Button>
+        </Button> */}
       </div>
 
       {isPending ? (
