@@ -4,6 +4,7 @@ import { useAudioRecorder } from "./hooks/useAudioRecorder";
 import { useVoiceAnswers } from "./hooks/useVoiceAnswers";
 import type { AnswerSubmission } from "./types/interviewTypes";
 import api from "@/api/axios";
+import { getDefaultAnswerMode, type AnswerMode } from "@/lib/preferences";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -41,8 +42,6 @@ interface InterviewSessionQuestionResponse {
   userRoadmapQuestionStatus: string;
 }
 
-type AnswerMode = "voice" | "text";
-
 const ANSWER_MODES = [
   { value: "voice", label: "Voice", icon: Mic },
   { value: "text", label: "Type", icon: Keyboard },
@@ -64,8 +63,8 @@ function InterviewQuestion() {
         [sessionQuestionId]: text,
       })),
   );
-  // Voice is the default; the last mode picked carries over to unvisited questions
-  const [preferredMode, setPreferredMode] = useState<AnswerMode>("voice");
+  // Starts from the default chosen in Settings; the last mode picked carries over to unvisited questions
+  const [preferredMode, setPreferredMode] = useState<AnswerMode>(getDefaultAnswerMode);
   const [answerModes, setAnswerModes] = useState<Record<number, AnswerMode>>({});
 
   const startInterviewSession = async (interviewSessionPublicId: string) => {

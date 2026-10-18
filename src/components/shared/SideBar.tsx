@@ -297,7 +297,11 @@ function SideBar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="top" className="w-56">
               <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings" onClick={(event) => handleNavClick(event, "/settings")}>
+                  Settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={() => auth?.logout()}

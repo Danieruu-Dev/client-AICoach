@@ -4,6 +4,9 @@ const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL;
 const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM;
 const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID;
 
+// Keycloak's own account console: password, email, active sessions
+export const KEYCLOAK_ACCOUNT_URL = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/account`;
+
 // Authorization Code + PKCE against the public Keycloak client.
 // Tokens are refreshed automatically with the refresh token before they expire.
 export const userManager = new UserManager({

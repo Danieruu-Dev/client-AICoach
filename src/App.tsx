@@ -14,6 +14,7 @@ import InterviewPreflight from "./features/interview/InterviewPreflight";
 import InterviewQuestion from "./features/interview/InterviewQuestion";
 import InterviewEvaluation from "./features/interview/InterviewEvaluation";
 import AuthCallback from "./routes/AuthCallback";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             <Route path="evaluation" element={<Navigate to="/roadmap" replace />} />
           </Route>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </>

@@ -10,16 +10,7 @@ import {
 } from "lucide-react";
 import type { ProfileState } from "@/pages/Onboarding";
 import { ChoiceCards, ChoicePills } from "./components/ChoiceGroups";
-
-// ids must match the server's CurrentStatus / CodingExperience enums
-const currentStatusOptions = [
-  { id: "STUDENT", name: "Student" },
-  { id: "FRESH_GRADUATE", name: "Fresh Graduate" },
-  { id: "CAREER_SHIFTER", name: "Career Shifter" },
-  { id: "JUNIOR_DEVELOPER", name: "Junior Developer" },
-  { id: "UNEMPLOYED", name: "Unemployed" },
-  { id: "EMPLOYED_LOOKING", name: "Employed but Looking" },
-];
+import { codingExperienceOptions, currentStatusOptions } from "./profileOptions";
 
 const statusMeta: Record<string, { icon: LucideIcon; description: string }> = {
   STUDENT: { icon: GraduationCap, description: "Still in school or a bootcamp" },
@@ -29,14 +20,6 @@ const statusMeta: Record<string, { icon: LucideIcon; description: string }> = {
   UNEMPLOYED: { icon: Search, description: "Between jobs and job hunting" },
   EMPLOYED_LOOKING: { icon: Briefcase, description: "Working, but open to a new role" },
 };
-
-const codingExperienceOptions = [
-  { id: "LESS_THAN_6_MONTHS", name: "Less than 6 months" },
-  { id: "SIX_MONTHS_TO_1_YEAR", name: "6 months to 1 year" },
-  { id: "ONE_TO_TWO_YEARS", name: "1 to 2 years" },
-  { id: "TWO_TO_FOUR_YEARS", name: "2 to 4 years" },
-  { id: "FOUR_PLUS_YEARS", name: "4+ years" },
-];
 
 export function OnboardingProfile({
   profile,
