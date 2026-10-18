@@ -8,10 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthProviderContext";
 import { cn } from "@/lib/utils";
 import {
-  FileText,
   BookOpen,
-  Gauge,
-  Gem,
   Home,
   LogOut,
   Menu,
@@ -19,11 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  ShieldCheck,
-  SquareUser,
-  Sparkles,
   X,
-  Users,
 } from "lucide-react";
 import { type MouseEvent, useState } from "react";
 import { useTheme } from "@/context/ThemeProviderContext";
@@ -58,7 +51,6 @@ function SideBar({
   email,
   avatarUrl,
   pageName,
-  showPlan = false,
   onNavigateAttempt,
 }: SideBarProps) {
   const { theme } = useTheme();
@@ -298,7 +290,10 @@ function SideBar({
             <DropdownMenuContent align="start" side="top" className="w-56">
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings" onClick={(event) => handleNavClick(event, "/settings")}>
+                <Link
+                  to="/settings"
+                  onClick={(event) => handleNavClick(event, "/settings")}
+                >
                   Settings
                 </Link>
               </DropdownMenuItem>
