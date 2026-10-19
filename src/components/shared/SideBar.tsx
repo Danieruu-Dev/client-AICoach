@@ -21,6 +21,7 @@ import {
 import { type MouseEvent, useState } from "react";
 import { useTheme } from "@/context/ThemeProviderContext";
 import { Link, useLocation } from "react-router-dom";
+import defaultAvatar from "@/assets/preparo_sprites/happy-checklist-preparo.png";
 
 type SideBarProps = {
   userName?: string;
@@ -85,7 +86,7 @@ function SideBar({
   const resolvedUserName = userName?.trim() || authUserName || "shadcn";
   const resolvedEmail = email?.trim() || auth?.user?.email || "m@example.com";
   const resolvedAvatarUrl =
-    avatarUrl || "/src/assets/preparo_sprites/happy-checklist-preparo.png";
+    avatarUrl || defaultAvatar;
   const isMobileOpen = mobileOpenPathname === location.pathname;
 
   const resolvedTheme =

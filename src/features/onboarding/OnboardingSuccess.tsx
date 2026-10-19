@@ -1,6 +1,7 @@
 import React, { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, BarChart3, Check, Lightbulb, Target } from "lucide-react";
 import { useAuth } from "@/context/AuthProviderContext";
+import successIllustration from "@/assets/preparo_sprites/thumbs-up-preparo.png";
 
 const confettiPieces = [
   {
@@ -168,7 +169,7 @@ function OnboardingSuccess() {
           <div className="absolute h-40 w-40 rounded-full bg-[#EFF9F8]" />
 
           <img
-            src="src/assets/preparo_sprites/thumbs-up-preparo.png"
+            src={successIllustration}
             alt="Success"
             className="relative z-10 w-28"
           />

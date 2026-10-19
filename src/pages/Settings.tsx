@@ -12,7 +12,6 @@ function Settings() {
           pageName="Settings"
           userName={`${auth?.user?.firstName ?? ""} ${auth?.user?.lastName ?? ""}`.trim()}
           email={auth?.user?.email}
-          avatarUrl="/preparo_sprites/happy-checklist-preparo.png"
         />
 
         <main className="flex min-h-screen min-w-0 flex-1 flex-col bg-background text-foreground">

@@ -15,6 +15,28 @@
       translate: 250%;
     }
   }
+  --animate-float: float 2.4s ease-in-out infinite;
+  @keyframes float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -10px;
+    }
+  }
+  --animate-twinkle: twinkle 1.8s ease-in-out infinite;
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+      scale: 0.7;
+    }
+    50% {
+      opacity: 1;
+      scale: 1;
+    }
+  }
   --font-heading: var(--font-sans);
   --font-sans: "Inter Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import builderIllustration from "@/assets/preparo_sprites/builder-preparo.png";
 
 function NotAvailable() {
   return (
@@ -10,7 +11,7 @@ function NotAvailable() {
         <CardHeader className="space-y-4 text-center items-center">
           <div className="flex size-36 items-center justify-center p-4 sm:size-100 mx-auto">
             <img
-              src="/src/assets/preparo_sprites/builder-preparo.png"
+              src={builderIllustration}
               alt="Builder Preparo"
               className="h-full w-full object-contain"
             />

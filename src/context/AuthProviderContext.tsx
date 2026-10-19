@@ -1,7 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth as useOidcAuth } from "react-oidc-context";
+import { useLocation } from "react-router-dom";
 import api from "@/api/axios";
+import PreparoLoader from "@/components/shared/PreparoLoader";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -37,6 +39,9 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const oidc = useOidcAuth();
+  const location = useLocation();
+  // What the user just clicked, so the loader can say what's happening
+  const [pendingAction, setPendingAction] = useState<"login" | "register" | "logout" | null>(null);
   // App user from /api/users/me, tagged with the Keycloak `sub` it was loaded for
   const [profile, setProfile] = useState<LoadedProfile | null>(null);
   // Guards against double redirects (StrictMode runs effects twice)
@@ -102,6 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = (returnTo = "/dashboard") => {
     if (redirecting.current) return;
     redirecting.current = true;
+    setPendingAction("login");
     oidc.signinRedirect({
       state: { returnTo },
       extraQueryParams: themeParams(),
@@ -111,6 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const register = () => {
     if (redirecting.current) return;
     redirecting.current = true;
+    setPendingAction("register");
     // prompt=create opens Keycloak's registration page instead of the login page
     oidc.signinRedirect({
       prompt: "create",
@@ -120,11 +127,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
+    setPendingAction("logout");
     setProfile(null);
     oidc.signoutRedirect();
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  const loadingMessage = () => {
+    if (pendingAction === "logout" || oidc.activeNavigator === "signoutRedirect") {
+      return "Logging you out...";
+    }
+    if (pendingAction === "register") return "Taking you to sign up...";
+    if (pendingAction === "login" || oidc.activeNavigator === "signinRedirect") {
+      return "Taking you to sign in...";
+    }
+    // Keycloak just sent the user back after logging in
+    if (location.pathname === "/auth/callback") return "Signing you in...";
+    // Returning visitor with a saved session
+    if (keycloakId) return "Loading your account...";
+    return "Loading Preparo...";
+  };
+
+  // An error wins so a failed redirect doesn't leave the loader up forever
+  if ((isLoading || pendingAction === "logout") && !oidc.error) {
+    return <PreparoLoader message={loadingMessage()} />;
+  }
 
   // Without this, a failed login or /me call would bounce between the app and Keycloak forever
   if (oidc.error || profileError) {

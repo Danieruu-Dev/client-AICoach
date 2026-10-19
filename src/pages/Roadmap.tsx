@@ -62,7 +62,6 @@ function Roadmap() {
         pageName="Roadmap"
         userName={userName || "shadcn"}
         email={auth?.user?.email ?? "m@example.com"}
-        avatarUrl="/preparo_sprites/happy-checklist-preparo.png"
         showPlan
       />
 

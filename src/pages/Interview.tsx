@@ -8,6 +8,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import api from "@/api/axios";
+import PreparoLoader from "@/components/shared/PreparoLoader";
 
 interface InterviewDetails {
   stageId: number;
@@ -55,16 +56,7 @@ function Interview() {
   }
 
   if (needsPreflightDetails && isPending) {
-    return (
-      <main className="flex h-dvh items-center justify-center bg-muted/20">
-        <div className="text-center">
-          <div className="mx-auto size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Loading interview details...
-          </p>
-        </div>
-      </main>
-    );
+    return <PreparoLoader message="Loading interview details..." />;
   }
 
   if (needsPreflightDetails && isError) {

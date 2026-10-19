@@ -1,12 +1,13 @@
 import { useAuth } from "@/context/AuthProviderContext";
 import SideBar from "@/components/shared/SideBar";
 import DashboardOverview from "@/features/dashboard/DashboardOverview";
+import PreparoLoader from "@/components/shared/PreparoLoader";
 
 function Dashboard() {
   const auth = useAuth();
 
   if (!auth) {
-    return <div>Loading...</div>;
+    return <PreparoLoader message="Loading your dashboard..." />;
   }
 
   return (
@@ -19,7 +20,6 @@ function Dashboard() {
             "shadcn"
           }
           email={auth.user?.email ?? "m@example.com"}
-          avatarUrl="/preparo_sprites/happy-checklist-preparo.png"
           showPlan
         />
 

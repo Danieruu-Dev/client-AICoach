@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, ArrowRight, Map, Play, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
+import adventureIllustration from "@/assets/preparo_sprites/adventure-preparo.png";
 
 export interface UserRoadmapProgressResponse {
   userRoadmapId: number;
@@ -130,7 +131,7 @@ function RoadmapSection() {
     <article className="overflow-hidden rounded-[8px] border border-border bg-card shadow-sm">
       <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:p-6">
         <img
-          src="/src/assets/preparo_sprites/adventure-preparo.png"
+          src={adventureIllustration}
           alt=""
           className="h-36 w-30 shrink-0 self-center object-contain"
         />
