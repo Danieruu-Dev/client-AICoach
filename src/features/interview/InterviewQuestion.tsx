@@ -3,6 +3,7 @@ import VoiceAnswerPanel from "./components/VoiceAnswerPanel";
 import { useAudioRecorder } from "./hooks/useAudioRecorder";
 import { useVoiceAnswers } from "./hooks/useVoiceAnswers";
 import type { AnswerSubmission } from "./types/interviewTypes";
+import { ANSWER_TEXT_MAX } from "./types/interviewTypes";
 import api from "@/api/axios";
 import { getDefaultAnswerMode, type AnswerMode } from "@/lib/preferences";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -355,6 +356,7 @@ function InterviewQuestion() {
                     activeVoiceAnswer?.status === "transcribing"
                   }
                   value={activeAnswer}
+                  maxLength={ANSWER_TEXT_MAX}
                   onChange={(event) => updateActiveAnswer(event.target.value)}
                   placeholder={
                     activeVoiceAnswer?.status === "transcribing"
@@ -364,7 +366,7 @@ function InterviewQuestion() {
                   className="mt-3 min-h-32 flex-1 resize-none rounded-sm border bg-background p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 <p className="mt-2 text-right text-[11px] text-muted-foreground">
-                  {activeAnswer.length} characters
+                  {activeAnswer.length}/{ANSWER_TEXT_MAX} characters
                 </p>
               </>
             )}

@@ -1,5 +1,6 @@
 import type { AudioRecorder } from "../hooks/useAudioRecorder";
 import type { VoiceAnswer } from "../hooks/useVoiceAnswers";
+import { ANSWER_TEXT_MAX } from "../types/interviewTypes";
 import {
   AlertCircle,
   Loader2,
@@ -122,6 +123,7 @@ function VoiceAnswerPanel({
           id={textareaId}
           disabled={disabled}
           value={answer}
+          maxLength={ANSWER_TEXT_MAX}
           onChange={(event) => onAnswerChange(event.target.value)}
           placeholder="Your transcript appears here..."
           className="min-h-32 flex-1 resize-none rounded-sm border bg-background p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/10"

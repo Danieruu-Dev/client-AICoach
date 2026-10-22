@@ -44,3 +44,6 @@ export interface InterviewEvaluation {
 }
 
 export type SubmissionResponse = InterviewEvaluation;
+
+// Same limit as the server (InputLimits.ANSWER_TEXT_MAX); every answer is graded by the AI
+export const ANSWER_TEXT_MAX = 8000;
