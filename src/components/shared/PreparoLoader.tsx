@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import mascot from "@/assets/preparo_sprites/happy-checklist-preparo.png";
+import { Button } from "@/components/ui/button";
 
 interface PreparoLoaderProps {
   message?: string;
   // Fill the whole screen (page loads) or just the parent (sections)
   fullScreen?: boolean;
+  // Shown as a "Try again" button once the wait gets long, for loads that may have stalled
+  onRetry?: () => void;
 }
 
 // The free hosting puts the API and Keycloak to sleep when idle, so the first
 // request can take a minute. Explain the wait instead of looking frozen.
 const SLOW_AFTER_MS = 6000;
+const RETRY_AFTER_MS = 20000;
 
 function Sparkle({ className }: { className: string }) {
   return (
@@ -23,12 +27,17 @@ function Sparkle({ className }: { className: string }) {
   );
 }
 
-function PreparoLoader({ message = "Loading Preparo...", fullScreen = true }: PreparoLoaderProps) {
+function PreparoLoader({ message = "Loading Preparo...", fullScreen = true, onRetry }: PreparoLoaderProps) {
   const [slow, setSlow] = useState(false);
+  const [showRetry, setShowRetry] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
-    return () => clearTimeout(timer);
+    const slowTimer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    const retryTimer = setTimeout(() => setShowRetry(true), RETRY_AFTER_MS);
+    return () => {
+      clearTimeout(slowTimer);
+      clearTimeout(retryTimer);
+    };
   }, []);
 
   return (
@@ -62,6 +71,15 @@ function PreparoLoader({ message = "Loading Preparo...", fullScreen = true }: Pr
         <p className="max-w-xs text-xs text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
           Waking up Preparo&apos;s servers. The first visit after a break can take up to a minute.
         </p>
+      )}
+
+      {onRetry && showRetry && (
+        <div className="flex flex-col items-center gap-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
+          <p className="text-xs text-muted-foreground">Still stuck?</p>
+          <Button variant="outline" onClick={onRetry}>
+            Try again
+          </Button>
+        </div>
       )}
     </div>
   );

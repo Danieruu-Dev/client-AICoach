@@ -2,8 +2,14 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 import api from "@/api/axios";
 import PreparoLoader from "@/components/shared/PreparoLoader";
+import { Button } from "@/components/ui/button";
+
+// The API sleeps when idle on free hosting and can take about a minute to wake.
+// Past this, assume the request is lost instead of showing the loader forever.
+const PROFILE_TIMEOUT_MS = 90000;
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,10 +26,12 @@ interface User {
   lastName: string;
   onboardingCompleted: boolean;
 }
+// "unreachable": no answer from the API (timeout or network); "failed": the API answered with an error
+type ProfileError = "unreachable" | "failed";
 interface LoadedProfile {
   keycloakId: string;
   user: User | null;
-  error: boolean;
+  error: ProfileError | null;
 }
 interface CurrentUserResponse {
   publicId: string;
@@ -44,25 +52,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [pendingAction, setPendingAction] = useState<"login" | "register" | "logout" | null>(null);
   // App user from /api/users/me, tagged with the Keycloak `sub` it was loaded for
   const [profile, setProfile] = useState<LoadedProfile | null>(null);
+  // Bumped by "Try again" to re-run the /me request
+  const [profileAttempt, setProfileAttempt] = useState(0);
   // Guards against double redirects (StrictMode runs effects twice)
   const redirecting = useRef(false);
 
   const keycloakId = oidc.isAuthenticated ? oidc.user?.profile.sub : undefined;
   const current = keycloakId && profile?.keycloakId === keycloakId ? profile : null;
   const user = current?.user ?? null;
-  const profileError = current?.error ?? false;
+  const profileError = current?.error ?? null;
 
   useEffect(() => {
     if (!keycloakId) return;
 
-    let cancelled = false;
+    const controller = new AbortController();
     api
-      .get<CurrentUserResponse>("/api/users/me")
+      .get<CurrentUserResponse>("/api/users/me", {
+        timeout: PROFILE_TIMEOUT_MS,
+        signal: controller.signal,
+      })
       .then((res) => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         setProfile({
           keycloakId,
-          error: false,
+          error: null,
           user: {
             id: res.data.publicId,
             email: res.data.email,
@@ -73,15 +86,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       })
       .catch((error) => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         console.error("Loading current user failed:", error);
-        setProfile({ keycloakId, error: true, user: null });
+        const unreachable = axios.isAxiosError(error) && !error.response;
+        setProfile({ keycloakId, error: unreachable ? "unreachable" : "failed", user: null });
       });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [keycloakId]);
+    // Cancels a request still in flight when the user retries or logs out
+    return () => controller.abort();
+  }, [keycloakId, profileAttempt]);
+
+  const retryProfile = () => {
+    setProfile(null);
+    setProfileAttempt((n) => n + 1);
+  };
 
   // Same signature as useState's setter so callers like Onboarding keep working
   const setUser: React.Dispatch<React.SetStateAction<User | null>> = (action) =>
@@ -149,21 +167,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // An error wins so a failed redirect doesn't leave the loader up forever
   if ((isLoading || pendingAction === "logout") && !oidc.error) {
-    return <PreparoLoader message={loadingMessage()} />;
+    // Only the /me request can be retried in place; Keycloak redirects can't
+    const loadingProfile = !oidc.isLoading && !pendingAction;
+    return (
+      <PreparoLoader
+        // Remount on retry so the slow/retry hints start over
+        key={profileAttempt}
+        message={loadingMessage()}
+        onRetry={loadingProfile ? retryProfile : undefined}
+      />
+    );
   }
 
   // Without this, a failed login or /me call would bounce between the app and Keycloak forever
   if (oidc.error || profileError) {
+    const message =
+      !oidc.error && profileError === "unreachable"
+        ? "Preparo's server isn't responding. It may still be waking up, so give it a moment and try again."
+        : "We couldn't sign you in. Please try again.";
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
-        <p>We couldn&apos;t sign you in. Please try again.</p>
+        <p className="max-w-sm">{message}</p>
         <div className="flex gap-2">
-          <button className="underline" onClick={() => window.location.assign("/")}>
-            Retry
-          </button>
-          <button className="underline" onClick={logout}>
+          {/* A failed /me call is retried in place so the user keeps the page they were going to */}
+          <Button onClick={oidc.error ? () => window.location.assign("/") : retryProfile}>
+            Try again
+          </Button>
+          <Button variant="outline" onClick={logout}>
             Log out
-          </button>
+          </Button>
         </div>
       </div>
     );
