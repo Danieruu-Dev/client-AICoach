@@ -23,3 +23,35 @@ export const userManager = new UserManager({
 export const onSigninCallback = () => {
   window.history.replaceState({}, document.title, window.location.pathname);
 };
+
+// Tokens live in sessionStorage, so they're gone once the tab or browser closes,
+// even though Keycloak's own session (its cookie) may still be valid.
+// This flag remembers that the browser had a login, so the app knows to ask Keycloak
+// on startup. It holds no token, just "1". Visitors who never logged in skip that
+// round trip, so they don't wait on a sleeping Keycloak.
+const HAD_SESSION_KEY = "preparo:hadSession";
+
+export const hadSession = () => {
+  try {
+    return localStorage.getItem(HAD_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+export const setHadSession = (value: boolean) => {
+  try {
+    if (value) localStorage.setItem(HAD_SESSION_KEY, "1");
+    else localStorage.removeItem(HAD_SESSION_KEY);
+  } catch {
+    // Storage blocked: the user just logs in by hand next time
+  }
+};
+
+// Keycloak's answer to a prompt=none check when there's no session left
+export const getNoSessionError = (error: { innerError?: unknown } | undefined) => {
+  const inner = error?.innerError as
+    | { error?: string; state?: { returnTo?: string } }
+    | undefined;
+  return inner?.error === "login_required" ? inner : undefined;
+};

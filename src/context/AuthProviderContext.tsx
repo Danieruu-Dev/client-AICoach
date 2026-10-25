@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import api from "@/api/axios";
 import { wakeServers } from "@/api/wakeServers";
+import { getNoSessionError, hadSession, setHadSession } from "@/api/keycloak";
 import PreparoLoader from "@/components/shared/PreparoLoader";
 import { Button } from "@/components/ui/button";
 
@@ -113,8 +114,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         : prev,
     );
 
+  // A failed quiet session check isn't an error: the user is just logged out
+  const sessionGone = !!getNoSessionError(oidc.error);
+  const oidcError = sessionGone ? undefined : oidc.error;
+
+  // Browser reopened after a login: the tokens are gone, so ask Keycloak whether
+  // its session is still alive (prompt=none never shows the login page)
+  const shouldCheckSession =
+    !oidc.isLoading &&
+    !oidc.isAuthenticated &&
+    !oidc.error &&
+    location.pathname !== "/auth/callback" &&
+    hadSession();
+
+  useEffect(() => {
+    if (oidc.isAuthenticated) setHadSession(true);
+  }, [oidc.isAuthenticated]);
+
+  useEffect(() => {
+    if (!sessionGone) return;
+    setHadSession(false);
+    // Let a protected page start the normal login after the failed check
+    redirecting.current = false;
+  }, [sessionGone]);
+
+  useEffect(() => {
+    if (!shouldCheckSession || redirecting.current) return;
+    redirecting.current = true;
+    oidc.signinRedirect({
+      prompt: "none",
+      state: { returnTo: location.pathname + location.search },
+    });
+  }, [shouldCheckSession, oidc, location.pathname, location.search]);
+
   const isAuthenticated = !!user;
-  const isLoading = oidc.isLoading || (!!keycloakId && !current);
+  const isLoading = oidc.isLoading || (!!keycloakId && !current) || shouldCheckSession;
 
   // Lets the Keycloak login theme match the app's light/dark mode
   const themeParams = () => ({
@@ -151,6 +185,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setPendingAction("logout");
     setProfile(null);
+    setHadSession(false);
     oidc.signoutRedirect();
   };
 
@@ -159,8 +194,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return "Logging you out...";
     }
     if (pendingAction === "register") return "Taking you to sign up...";
-    if (pendingAction === "login" || oidc.activeNavigator === "signinRedirect") {
-      return "Taking you to sign in...";
+    if (pendingAction === "login") return "Taking you to sign in...";
+    // A redirect nobody clicked is the quiet session check
+    if (shouldCheckSession || oidc.activeNavigator === "signinRedirect") {
+      return "Loading your account...";
     }
     // Keycloak just sent the user back after logging in
     if (location.pathname === "/auth/callback") return "Signing you in...";
@@ -170,9 +207,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // An error wins so a failed redirect doesn't leave the loader up forever
-  if ((isLoading || pendingAction === "logout") && !oidc.error) {
+  if ((isLoading || pendingAction === "logout") && !oidcError) {
     // Only the /me request can be retried in place; Keycloak redirects can't
-    const loadingProfile = !oidc.isLoading && !pendingAction;
+    const loadingProfile = !oidc.isLoading && !pendingAction && !shouldCheckSession;
     return (
       <PreparoLoader
         // Remount on retry so the slow/retry hints start over
@@ -184,9 +221,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   // Without this, a failed login or /me call would bounce between the app and Keycloak forever
-  if (oidc.error || profileError) {
+  if (oidcError || profileError) {
     const message =
-      !oidc.error && profileError === "unreachable"
+      !oidcError && profileError === "unreachable"
         ? "Preparo's server isn't responding. It may still be waking up, so give it a moment and try again."
         : "We couldn't sign you in. Please try again.";
     return (
@@ -194,7 +231,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         <p className="max-w-sm">{message}</p>
         <div className="flex gap-2">
           {/* A failed /me call is retried in place so the user keeps the page they were going to */}
-          <Button onClick={oidc.error ? () => window.location.assign("/") : retryProfile}>
+          <Button onClick={oidcError ? () => window.location.assign("/") : retryProfile}>
             Try again
           </Button>
           <Button variant="outline" onClick={logout}>

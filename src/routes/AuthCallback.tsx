@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useAuth } from "../context/AuthProviderContext";
+import { getNoSessionError } from "../api/keycloak";
 
 /**
  * Keycloak redirects here after login. The token exchange is already done
@@ -9,6 +10,11 @@ import { useAuth } from "../context/AuthProviderContext";
 function AuthCallback() {
   const auth = useAuth();
   const oidc = useOidcAuth();
+
+  // The quiet session check found no session: go back to the page the user opened.
+  // A protected page then sends them to the normal login.
+  const noSession = getNoSessionError(oidc.error);
+  if (noSession) return <Navigate to={noSession.state?.returnTo ?? "/"} replace />;
 
   if (!auth?.isAuthenticated) return <Navigate to="/" replace />;
 
