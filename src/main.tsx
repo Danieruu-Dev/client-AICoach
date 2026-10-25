@@ -9,6 +9,10 @@ import { AuthProvider } from "./context/AuthProviderContext.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider as OidcProvider } from "react-oidc-context";
 import { onSigninCallback, userManager } from "./api/keycloak.ts";
+import { wakeServers } from "./api/wakeServers.ts";
+
+// Start booting the sleeping servers before the user even clicks Login
+wakeServers();
 
 const queryClient = new QueryClient();
 

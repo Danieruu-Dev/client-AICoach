@@ -4,6 +4,7 @@ import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import api from "@/api/axios";
+import { wakeServers } from "@/api/wakeServers";
 import PreparoLoader from "@/components/shared/PreparoLoader";
 import { Button } from "@/components/ui/button";
 
@@ -125,6 +126,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = (returnTo = "/dashboard") => {
     if (redirecting.current) return;
     redirecting.current = true;
+    // No-op if the app already pinged on load; covers a tab left open past the sleep timer
+    wakeServers();
     setPendingAction("login");
     oidc.signinRedirect({
       state: { returnTo },
@@ -136,6 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (redirecting.current) return;
     redirecting.current = true;
     setPendingAction("register");
+    wakeServers();
     // prompt=create opens Keycloak's registration page instead of the login page
     oidc.signinRedirect({
       prompt: "create",
