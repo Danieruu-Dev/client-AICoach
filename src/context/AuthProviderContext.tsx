@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import api from "@/api/axios";
 import { wakeServers } from "@/api/wakeServers";
@@ -50,6 +51,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const oidc = useOidcAuth();
   const location = useLocation();
+  const queryClient = useQueryClient();
   // What the user just clicked, so the loader can say what's happening
   const [pendingAction, setPendingAction] = useState<"login" | "register" | "logout" | null>(null);
   // App user from /api/users/me, tagged with the Keycloak `sub` it was loaded for
@@ -186,6 +188,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setPendingAction("logout");
     setProfile(null);
     setHadSession(false);
+    // The next person on this browser must never see this user's cached data
+    queryClient.clear();
     oidc.signoutRedirect();
   };
 

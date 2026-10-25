@@ -22,6 +22,7 @@ function renderEvaluation(status, isError = false) {
         return new Proxy({}, { get: () => props => React.createElement("div", null, props.children) });
       }
       if (name === "./api/evaluationApi") return {};
+      if (name === "@/lib/queryCache") return { invalidateProgress: () => {} };
       if (name === "./types/interviewTypes") {
         const types = {};
         vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname, "types/interviewTypes.ts"), "utf8"), {

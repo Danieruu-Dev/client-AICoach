@@ -14,7 +14,17 @@ import { wakeServers } from "./api/wakeServers.ts";
 // Start booting the sleeping servers before the user even clicks Login
 wakeServers();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Reuse cached data for a minute instead of refetching on every visit.
+      // Saves refresh what they change (see lib/queryCache.ts).
+      staleTime: 60_000,
+      // Switching back to the tab shouldn't reload everything
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { invalidateProgress } from "@/lib/queryCache";
 import { type ReactNode, useEffect } from "react";
 import {
   AlertCircle,
@@ -211,14 +212,7 @@ function InterviewEvaluation() {
       evaluation.data?.status !== "FAILED"
     )
       return;
-    for (const key of [
-      "roadmap-stages",
-      "roadmap-summary",
-      "roadmap-profile",
-      "completed-attempts",
-    ]) {
-      void queryClient.invalidateQueries({ queryKey: [key] });
-    }
+    invalidateProgress(queryClient);
   }, [evaluation.data?.status, interviewSessionPublicId, queryClient]);
 
   if (!interviewSessionPublicId) return <Navigate to="/roadmap" replace />;

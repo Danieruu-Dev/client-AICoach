@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { invalidateProgress } from "@/lib/queryCache";
 import { Loader2, Target } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -67,6 +68,7 @@ function PreparationGoalSection({
     mutationFn: updateInterviewDate,
     onSuccess: (settings) => {
       queryClient.setQueryData(queryKey, settings);
+      invalidateProgress(queryClient);
       toast.success("Interview date saved");
     },
     onError: (error) => toast.error(settingsErrorMessage(error, "Couldn’t save your interview date")),

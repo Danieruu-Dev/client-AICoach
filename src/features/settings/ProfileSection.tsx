@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { codingExperienceOptions, currentStatusOptions } from "@/features/onboarding/profileOptions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { invalidateProgress } from "@/lib/queryCache";
 import { IdCard, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -40,6 +41,8 @@ function ProfileSection({ profile, queryKey }: { profile: SettingsProfile; query
     mutationFn: updateProfile,
     onSuccess: (settings) => {
       queryClient.setQueryData(queryKey, settings);
+      // The roadmap page shows coding experience and current status
+      invalidateProgress(queryClient);
       toast.success("Profile saved");
     },
     onError: (error) => toast.error(settingsErrorMessage(error, "Couldn’t save your profile")),

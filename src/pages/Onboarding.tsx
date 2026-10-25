@@ -16,7 +16,7 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import api from "@/api/axios";
 import { useAuth } from "@/context/AuthProviderContext";
@@ -274,11 +274,14 @@ export default function Onboarding() {
 
     return response.data;
   };
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: handleSubmit,
     onSuccess: () => {
       // The response is an object ({ message, roadmapId, ... }); toasts can only render text
       toast.success("You're all set! Your roadmap is ready.");
+      // A brand-new roadmap: drop anything cached before it existed
+      void queryClient.invalidateQueries();
       auth?.setUser((prev) =>
         prev ? { ...prev, onboardingCompleted: true } : prev,
       );

@@ -7,6 +7,7 @@ import { ANSWER_TEXT_MAX } from "./types/interviewTypes";
 import api from "@/api/axios";
 import { getDefaultAnswerMode, type AnswerMode } from "@/lib/preferences";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { invalidateProgress } from "@/lib/queryCache";
 import {
   AlertCircle,
   ArrowLeft,
@@ -115,8 +116,7 @@ function InterviewQuestion() {
       submitAnswers(answers),
     onSuccess: (evaluation) => {
       queryClient.setQueryData(["interview-evaluation", interviewSessionPublicId], evaluation);
-      void queryClient.invalidateQueries({ queryKey: ["roadmap-stages"] });
-      void queryClient.invalidateQueries({ queryKey: ["roadmap-summary"] });
+      invalidateProgress(queryClient);
       navigate(`/interview/evaluation/${interviewSessionPublicId}`, { replace: true });
     },
   });

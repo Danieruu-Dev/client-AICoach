@@ -1,6 +1,7 @@
 import api from "@/api/axios";
 import readyIllustration from "@/assets/preparo_sprites/check-preparo.png";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { invalidateProgress } from "@/lib/queryCache";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -46,6 +47,7 @@ function InterviewPreflight() {
   const stageId = searchParams.get("stageId");
   const roadmapPublicId = searchParams.get("userRoadmapPublicId");
 
+  const queryClient = useQueryClient();
   const interviewSessionMutation = useMutation({
     mutationFn: async () => {
       if (!stageId || !roadmapPublicId) {
@@ -64,6 +66,8 @@ function InterviewPreflight() {
       };
     },
     onSuccess: (session) => {
+      // A new session shows up in recent activity and the stage's interview details
+      invalidateProgress(queryClient);
       navigate(`/interview/question/${session.publicId}`);
     },
   });

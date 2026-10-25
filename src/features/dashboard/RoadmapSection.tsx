@@ -134,6 +134,7 @@ function RoadmapSection() {
           src={adventureIllustration}
           alt=""
           className="h-36 w-30 shrink-0 self-center object-contain"
+          loading="eager"
         />
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">

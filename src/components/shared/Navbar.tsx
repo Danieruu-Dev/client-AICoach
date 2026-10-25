@@ -24,10 +24,29 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2" aria-label="Preparo home">
-          <img src="/icon-preparo.png" alt="" className="h-8 w-11" />
-          <img src="/preparo_typo_dark.png" alt="Preparo" className="h-9 dark:hidden" />
-          <img src="/preparo_typo_light.png" alt="Preparo" className="hidden h-9 dark:block" />
+        <Link
+          to="/"
+          className="flex items-center gap-2"
+          aria-label="Preparo home"
+        >
+          <img
+            src="/icon-preparo.png"
+            alt=""
+            className="h-8 w-11"
+            loading="eager"
+          />
+          <img
+            src="/preparo_typo_dark.png"
+            alt="Preparo"
+            className="h-9 dark:hidden"
+            loading="eager"
+          />
+          <img
+            src="/preparo_typo_light.png"
+            alt="Preparo"
+            className="hidden h-9 dark:block"
+            loading="eager"
+          />
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
@@ -69,7 +88,12 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-lg" className="md:hidden" aria-label="Open menu">
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                className="md:hidden"
+                aria-label="Open menu"
+              >
                 <Menu className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -82,7 +106,9 @@ export default function Navbar() {
               {!isSignedIn && (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => auth?.login()}>Log in</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => auth?.login()}>
+                    Log in
+                  </DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
