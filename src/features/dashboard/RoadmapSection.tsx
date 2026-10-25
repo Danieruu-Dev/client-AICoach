@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, ArrowRight, Map, Play, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
-import adventureIllustration from "@/assets/preparo_sprites/adventure-preparo.png";
+import adventureIllustration from "@/assets/preparo_sprites/adventure-preparo.webp";
 
 export interface UserRoadmapProgressResponse {
   userRoadmapId: number;

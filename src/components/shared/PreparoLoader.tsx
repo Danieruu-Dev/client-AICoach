@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import mascot from "@/assets/preparo_sprites/happy-checklist-preparo.png";
+import mascot from "@/assets/preparo_sprites/happy-checklist-preparo.webp";
 import { Button } from "@/components/ui/button";
 
 interface PreparoLoaderProps {

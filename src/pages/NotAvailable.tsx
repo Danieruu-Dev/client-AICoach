@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import builderIllustration from "@/assets/preparo_sprites/builder-preparo.png";
+import builderIllustration from "@/assets/preparo_sprites/builder-preparo.webp";
 
 function NotAvailable() {
   return (

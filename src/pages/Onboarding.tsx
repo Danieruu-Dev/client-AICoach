@@ -308,8 +308,8 @@ export default function Onboarding() {
       <header className="flex h-16 items-center justify-between border-b border-border px-4 md:px-6">
         <div className="flex items-center gap-2">
           <img src="/icon-preparo.png" alt="" className="h-8 w-11" />
-          <img src="/preparo_typo_dark.png" alt="Preparo" className="h-9 dark:hidden" />
-          <img src="/preparo_typo_light.png" alt="Preparo" className="hidden h-9 dark:block" />
+          <img src="/preparo_typo_dark.webp" alt="Preparo" className="h-9 dark:hidden" />
+          <img src="/preparo_typo_light.webp" alt="Preparo" className="hidden h-9 dark:block" />
         </div>
         <div className="flex items-center gap-2">
           <ModeToggle />

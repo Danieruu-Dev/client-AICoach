@@ -1,5 +1,5 @@
 import api from "@/api/axios";
-import readyIllustration from "@/assets/preparo_sprites/check-preparo.png";
+import readyIllustration from "@/assets/preparo_sprites/check-preparo.webp";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { invalidateProgress } from "@/lib/queryCache";
 import { Button } from "@/components/ui/button";

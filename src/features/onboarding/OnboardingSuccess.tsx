@@ -1,7 +1,7 @@
 import React, { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, BarChart3, Check, Lightbulb, Target } from "lucide-react";
 import { useAuth } from "@/context/AuthProviderContext";
-import successIllustration from "@/assets/preparo_sprites/thumbs-up-preparo.png";
+import successIllustration from "@/assets/preparo_sprites/thumbs-up-preparo.webp";
 
 const confettiPieces = [
   {

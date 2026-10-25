@@ -1,4 +1,4 @@
-import feedbackIllustration from "@/assets/preparo_sprites/thumbs-up-preparo.png";
+import feedbackIllustration from "@/assets/preparo_sprites/thumbs-up-preparo.webp";
 import {
   Accordion,
   AccordionContent,

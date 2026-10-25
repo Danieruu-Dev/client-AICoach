@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import mascot from "@/assets/preparo_sprites/happy-checklist-preparo.png";
+import mascot from "@/assets/preparo_sprites/happy-checklist-preparo.webp";
 import twinkle from "@/assets/bg_design/twinkle.png";
 
 const steps = [

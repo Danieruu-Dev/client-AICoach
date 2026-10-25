@@ -21,7 +21,7 @@ import {
 import { type MouseEvent, useState } from "react";
 import { useTheme } from "@/context/ThemeProviderContext";
 import { Link, useLocation } from "react-router-dom";
-import defaultAvatar from "@/assets/preparo_sprites/happy-checklist-preparo.png";
+import defaultAvatar from "@/assets/preparo_sprites/happy-checklist-preparo.webp";
 
 type SideBarProps = {
   userName?: string;
@@ -98,8 +98,8 @@ function SideBar({
       : theme;
   const brandLogo =
     resolvedTheme === "dark"
-      ? "/preparo_typo_light.png"
-      : "/preparo_typo_dark.png";
+      ? "/preparo_typo_light.webp"
+      : "/preparo_typo_dark.webp";
 
   const initials =
     resolvedUserName

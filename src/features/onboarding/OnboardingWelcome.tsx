@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import mascot from "@/assets/preparo_sprites/happy-raising-arms-preparo.png";
+import mascot from "@/assets/preparo_sprites/happy-raising-arms-preparo.webp";
 
 // Mirrors the onboarding stepper: Profile, Preparation, Skills, Review
 const setupSteps = [

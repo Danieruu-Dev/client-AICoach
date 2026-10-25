@@ -36,13 +36,13 @@ export default function Navbar() {
             loading="eager"
           />
           <img
-            src="/preparo_typo_dark.png"
+            src="/preparo_typo_dark.webp"
             alt="Preparo"
             className="h-9 dark:hidden"
             loading="eager"
           />
           <img
-            src="/preparo_typo_light.png"
+            src="/preparo_typo_light.webp"
             alt="Preparo"
             className="hidden h-9 dark:block"
             loading="eager"
