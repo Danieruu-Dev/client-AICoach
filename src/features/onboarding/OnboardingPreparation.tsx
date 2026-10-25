@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { ChoiceCards, ChoicePills, type Choice } from "./components/ChoiceGroups";
+import { fetchCareerRoles } from "./api/catalogApi";
 
 const CAREER_GOAL_MAX_LENGTH = 500;
 
@@ -67,9 +68,10 @@ function OnboardingPreparation({
     setPreparation((prev) => ({ ...prev, ...updates }));
   };
 
+  // Keeps each role's domains; the skills step uses them for suggestions
   const { data: careerRoles, isPending: rolesPending } = useQuery({
     queryKey: ["career-role"],
-    queryFn: fetchChoices("/api/profile/career-role"),
+    queryFn: fetchCareerRoles,
   });
 
   const { data: industries, isPending: industriesPending } = useQuery({

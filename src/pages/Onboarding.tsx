@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import OnboardingPreparation from "@/features/onboarding/OnboardingPreparation";
+import type { CareerRole, Proficiency, Technology } from "@/features/onboarding/api/catalogApi";
 import { useNavigate } from "react-router-dom";
 
 const LEGAL_VERSION = "1.0";
@@ -44,7 +45,8 @@ type Options = {
 };
 
 export interface PreparationState {
-  targetRole: Options | null;
+  // Keeps the role's domains so the skills step can suggest technologies for it
+  targetRole: CareerRole | null;
   targetIndustry: Options | null;
   hasUpcomingInterview: boolean;
   interviewDate?: Date;
@@ -55,10 +57,9 @@ export interface ProfileState {
   currentStatus: Options | null;
   codingExperience: Options | null;
 }
-export type Skills = {
-  id: number;
-  name: string;
-  category?: string;
+// A picked technology plus how strong the user is in it
+export type Skills = Technology & {
+  proficiency: Proficiency;
 };
 
 // Header copy for steps 1-4
@@ -100,6 +101,7 @@ interface OnboardingData {
   };
   preparationGoalTechnology: {
     technologyId: number;
+    proficiency: Proficiency;
   }[];
   acceptedTermsVersion: string;
   acceptedPrivacyVersion: string;
@@ -253,6 +255,7 @@ export default function Onboarding() {
       },
       preparationGoalTechnology: skills.map((skill) => ({
         technologyId: Number(skill.id) || 0,
+        proficiency: skill.proficiency,
       })),
       acceptedTermsVersion: LEGAL_VERSION,
       acceptedPrivacyVersion: LEGAL_VERSION,
@@ -273,10 +276,12 @@ export default function Onboarding() {
       navigate("/dashboard", { replace: true });
     },
     onError: (error) => {
-      // Error bodies can be plain text or JSON; only ever pass a string to the toast
+      // Error bodies can be plain text or JSON; only ever pass a string to the toast.
+      // The server's ErrorResponse puts the specific reason in errors[] and a generic one in message
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       const errorMessage =
         (typeof data === "string" && data) ||
+        (typeof data?.errors?.[0] === "string" && data.errors[0]) ||
         (typeof data?.message === "string" && data.message) ||
         "We couldn't save your answers. Please try again.";
       toast.error(errorMessage);
@@ -369,7 +374,7 @@ export default function Onboarding() {
                     skills={skills}
                     setSkills={setSkills}
                     showValidationError={showValidationError}
-                    targetRoleName={preparation.targetRole?.name}
+                    targetRole={preparation.targetRole}
                   />
                 )}
                 {currentStep === 4 && (

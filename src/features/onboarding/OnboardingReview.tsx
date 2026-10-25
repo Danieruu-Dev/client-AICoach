@@ -1,8 +1,16 @@
 import { PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { PreparationState, ProfileState, Skills } from "@/pages/Onboarding";
+import { proficiencyOptions, proficiencyLabels } from "./api/catalogApi";
 
 type ReviewRow = { label: string; value: React.ReactNode };
+
+// Strongest first, so the review leads with what the user excels at
+const strengthRank = (skill: Skills) =>
+  -proficiencyOptions.findIndex((option) => option.value === skill.proficiency);
+const sortByStrength = (skills: Skills[]) =>
+  [...skills].sort((a, b) => strengthRank(a) - strengthRank(b));
 
 function ReviewSection({
   title,
@@ -104,12 +112,18 @@ function OnboardingReview({
 
       <ReviewSection title={`Skills (${skills.length})`} step={3} onEdit={onEdit}>
         <ul className="mt-3 flex flex-wrap gap-1.5">
-          {skills.map((skill) => (
+          {sortByStrength(skills).map((skill) => (
             <li
               key={skill.id}
-              className="inline-flex h-7 items-center rounded-full border bg-muted/40 px-3 text-xs font-medium"
+              className={cn(
+                "inline-flex h-7 items-center gap-1.5 rounded-full border bg-muted/40 px-3 text-xs font-medium",
+                skill.proficiency === "STRONG" && "border-primary/40 bg-primary/6",
+              )}
             >
               {skill.name}
+              <span className="font-normal text-muted-foreground">
+                · {proficiencyLabels[skill.proficiency]}
+              </span>
             </li>
           ))}
         </ul>
