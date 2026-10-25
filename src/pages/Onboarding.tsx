@@ -39,6 +39,14 @@ import { useNavigate } from "react-router-dom";
 
 const LEGAL_VERSION = "1.0";
 
+// The day the user picked, in their own time zone. Sending a Date would serialize as UTC,
+// which moves the day back for users ahead of UTC (e.g. Nov 2 00:00 in GMT+8 is Nov 1 in UTC)
+function toDateOnly(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 type Options = {
   id: number | string;
   name: string;
@@ -96,7 +104,8 @@ interface OnboardingData {
     targetRoleId: number;
     targetIndustryId: number;
     hasUpcomingInterview: boolean;
-    interviewDate?: Date;
+    // "yyyy-mm-dd"
+    interviewDate?: string;
     careerGoal: string;
   };
   preparationGoalTechnology: {
@@ -250,7 +259,7 @@ export default function Onboarding() {
         targetRoleId: Number(preparation.targetRole?.id) || 0,
         targetIndustryId: Number(preparation.targetIndustry?.id) || 0,
         hasUpcomingInterview: preparation.hasUpcomingInterview,
-        interviewDate: preparation.interviewDate,
+        interviewDate: preparation.interviewDate && toDateOnly(preparation.interviewDate),
         careerGoal: preparation.careerGoal || "",
       },
       preparationGoalTechnology: skills.map((skill) => ({

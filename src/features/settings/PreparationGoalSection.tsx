@@ -106,7 +106,7 @@ function PreparationGoalSection({
         )}
       </dl>
       <p className="mt-4 text-xs text-muted-foreground">
-        Changing your role or technologies isn’t available yet, since it means building a new roadmap.
+        Changing your role or technologies is coming soon. It will rebuild your roadmap around your new picks.
       </p>
 
       <form
