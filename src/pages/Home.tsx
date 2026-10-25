@@ -1,5 +1,5 @@
 import { ArrowRight, CircleCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "@/components/shared/Navbar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthProviderContext";
@@ -12,14 +12,24 @@ import {
 } from "@/features/landing/LandingSections";
 import twinkle from "@/assets/bg_design/twinkle.png";
 
-const highlights = ["No credit card required", "Instant setup", "Cancel anytime"];
+const highlights = [
+  "No credit card required",
+  "Instant setup",
+  "Cancel anytime",
+];
 
 function Home() {
   const auth = useAuth();
+
   const navigate = useNavigate();
   const isSignedIn = auth?.isAuthenticated ?? false;
 
-  const handleStart = () => (isSignedIn ? navigate("/dashboard") : auth?.register());
+  const handleStart = () =>
+    isSignedIn ? navigate("/dashboard") : auth?.register();
+
+  // Signed-in users skip the landing page. AuthProvider shows its loader until
+  // the session is known, so the landing page never flashes first.
+  if (isSignedIn) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -46,11 +56,18 @@ function Home() {
             </p>
 
             <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
-              <Button onClick={handleStart} className="h-11 rounded-[6px] px-6 text-sm">
+              <Button
+                onClick={handleStart}
+                className="h-11 rounded-[6px] px-6 text-sm"
+              >
                 {isSignedIn ? "Go to dashboard" : "Get started free"}
                 <ArrowRight className="size-4" />
               </Button>
-              <Button asChild variant="outline" className="h-11 rounded-[6px] px-6 text-sm">
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 rounded-[6px] px-6 text-sm"
+              >
                 <a href="#how-it-works">See how it works</a>
               </Button>
             </div>
@@ -58,7 +75,10 @@ function Home() {
             <ul className="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start">
               {highlights.map((item) => (
                 <li key={item} className="flex items-center gap-1.5">
-                  <CircleCheck className="size-4 text-(--preparo-teal)" aria-hidden="true" />
+                  <CircleCheck
+                    className="size-4 text-(--preparo-teal)"
+                    aria-hidden="true"
+                  />
                   {item}
                 </li>
               ))}
