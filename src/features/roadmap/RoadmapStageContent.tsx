@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { getRoadmapStageDetails } from "./roadmapStageDetails";
 import { fetchCompletedAttempts } from "./api/attemptsApi";
@@ -41,7 +41,12 @@ function RoadmapStageContent({
     enabled: Boolean(userRoadmapPublicId && stageId),
   });
   const { refetch: refetchAttempts } = attemptsQuery;
+  const lastStatus = useRef({ stageId, stageStatus });
   useEffect(() => {
+    const previous = lastStatus.current;
+    lastStatus.current = { stageId, stageStatus };
+    if (previous.stageId !== stageId || previous.stageStatus === stageStatus)
+      return;
     if (stageStatus && userRoadmapPublicId && stageId) void refetchAttempts();
   }, [stageStatus, userRoadmapPublicId, stageId, refetchAttempts]);
   const generating = stageStatus === "GENERATING";
